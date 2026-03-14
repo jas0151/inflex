@@ -1261,9 +1261,18 @@ async function loadFearGreed() {
 
 // ── NEWS (RSS via allorigins proxy) ──
 const RSS_SOURCES = [
-  { url: 'https://cointelegraph.com/rss', source: 'CoinTelegraph' },
-  { url: 'https://decrypt.co/feed',       source: 'Decrypt' },
-  { url: 'https://www.theblock.co/rss.xml', source: 'The Block' },
+  { url: 'https://cointelegraph.com/rss',                    source: 'CoinTelegraph' },
+  { url: 'https://decrypt.co/feed',                          source: 'Decrypt' },
+  { url: 'https://www.theblock.co/rss.xml',                  source: 'The Block' },
+  { url: 'https://messari.io/rss',                           source: 'Messari' },
+  { url: 'https://delphidigital.io/feed',                    source: 'Delphi Digital' },
+  { url: 'https://www.coinbase.com/institutional/rss',       source: 'Coinbase Institutional' },
+  { url: 'https://www.coindesk.com/arc/outboundfeeds/rss/', source: 'CoinDesk' },
+  { url: 'https://blockworks.co/feed',                       source: 'Blockworks' },
+  { url: 'https://www.dlnews.com/rss',                       source: 'DL News' },
+  { url: 'https://www.bankless.com/rss',                     source: 'Bankless' },
+  { url: 'https://newhedge.io/news/rss',                     source: 'NewHedge' },
+  { url: 'https://seekingalpha.com/feed.xml',                source: 'Seeking Alpha' },
 ];
 
 const CAT_RULES = [
