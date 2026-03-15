@@ -360,7 +360,10 @@
   .preview-pane ul, .preview-pane ol { margin: 12px 0; padding-left: 22px; }
   .preview-pane li { margin-bottom: 6px; }
   .preview-pane a { color: #c8001a; }
-  .preview-pane img { max-width: 100%; border-radius: 5px; margin: 14px 0; }
+  .preview-pane img { max-width: 100%; border-radius: 5px; margin: 14px 0; display: block; }
+  .preview-pane figure { margin: 20px 0; }
+  .preview-pane figure img { margin-bottom: 6px; }
+  .preview-pane figcaption { font-size: 13px; color: #888; text-align: center; font-style: italic; }
 
   /* ── Cover image ── */
   .cover-upload {
@@ -578,7 +581,8 @@
               <button type="button" class="tb" onclick="insertList('ol')" title="Numbered list">1. List</button>
               <div class="toolbar-sep"></div>
               <button type="button" class="tb" onclick="insertLink()" title="Link">Link</button>
-              <button type="button" class="tb" onclick="insertImage()" title="Image">Img</button>
+              <button type="button" class="tb" onclick="insertImage()" title="Upload image into content">Img</button>
+              <input type="file" id="contentImageInput" accept="image/*" style="display:none" onchange="handleContentImage(this)">
             </div>
             <textarea id="articleContent" class="form-input content-textarea" placeholder="Write your article content here using HTML tags for formatting..." required></textarea>
             <div class="preview-pane" id="previewPane"></div>
@@ -899,13 +903,36 @@ function insertLink() {
 }
 
 function insertImage() {
-  const url = prompt('Enter image URL (or paste a base64 data URL):');
-  if (!url) return;
-  const ta = document.getElementById('articleContent');
-  const start = ta.selectionStart;
-  const insert = `<img src="${url}" alt="">`;
-  ta.setRangeText(insert, start, ta.selectionEnd, 'end');
-  ta.focus();
+  // Open file picker — the file input's onchange calls handleContentImage
+  document.getElementById('contentImageInput').click();
+}
+
+function handleContentImage(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Image too large (max 5MB)', true);
+    input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64 = e.target.result;
+    const caption = prompt('Image caption (optional):') || '';
+    const ta = document.getElementById('articleContent');
+    const pos = ta.selectionStart;
+    let insert;
+    if (caption) {
+      insert = `\n<figure>\n  <img src="${base64}" alt="${caption.replace(/"/g, '&quot;')}">\n  <figcaption>${caption}</figcaption>\n</figure>\n`;
+    } else {
+      insert = `\n<img src="${base64}" alt="">\n`;
+    }
+    ta.setRangeText(insert, pos, ta.selectionEnd, 'end');
+    ta.focus();
+    updateWordCount();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
 }
 
 // ── Tabs (Write / Preview) ──
