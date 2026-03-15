@@ -29,10 +29,17 @@ async function initDb() {
       read_time TEXT DEFAULT '',
       is_featured BOOLEAN DEFAULT FALSE,
       published BOOLEAN DEFAULT TRUE,
+      views INTEGER DEFAULT 0,
+      scheduled_at TIMESTAMP DEFAULT NULL,
+      meta_description TEXT DEFAULT '',
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
   `;
+  // Migration: add new columns safely
+  try { await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS views INTEGER DEFAULT 0`; } catch(e) {}
+  try { await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMP DEFAULT NULL`; } catch(e) {}
+  try { await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS meta_description TEXT DEFAULT ''`; } catch(e) {}
   initialized = true;
 }
 

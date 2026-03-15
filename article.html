@@ -4,25 +4,101 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loading... — Inflex Trades</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="inflex.css">
 <style>
+  /* ── CSS Custom Properties ── */
+  :root {
+    --bg: #ffffff;
+    --surface: #faf8f4;
+    --text: #1a1a18;
+    --text2: #292929;
+    --text-muted: #555;
+    --text-muted2: #666;
+    --text-muted3: #888;
+    --text-muted4: #999;
+    --accent: #c8001a;
+    --accent-hover: #a5001a;
+    --border: #e8e4df;
+    --code-bg: #f3f0ec;
+    --code-block-bg: #1a1a18;
+    --code-block-text: #e6e6e6;
+    --nav-bg: rgba(255,255,255,0.95);
+    --cta-bg: #faf8f4;
+    --card-bg: #ffffff;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --card-shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
+    --toc-text: #888;
+    --toc-active: #1a1a18;
+    --share-bg: #f3f0ec;
+    --share-hover: #e8e4df;
+    --scrolltop-bg: #f3f0ec;
+    --scrolltop-hover: #e8e4df;
+    --img-placeholder: linear-gradient(135deg, #e8e4df 0%, #d8d0c4 100%);
+  }
+
+  html.dark {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --text: #e6edf3;
+    --text2: #cdd9e5;
+    --text-muted: #8b949e;
+    --text-muted2: #8b949e;
+    --text-muted3: #6e7681;
+    --text-muted4: #6e7681;
+    --accent: #c8001a;
+    --accent-hover: #e0102a;
+    --border: #30363d;
+    --code-bg: #1c2128;
+    --code-block-bg: #161b22;
+    --code-block-text: #e6edf3;
+    --nav-bg: rgba(13,17,23,0.95);
+    --cta-bg: #161b22;
+    --card-bg: #161b22;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --card-shadow-hover: 0 6px 20px rgba(0,0,0,0.4);
+    --toc-text: #6e7681;
+    --toc-active: #e6edf3;
+    --share-bg: #21262d;
+    --share-hover: #30363d;
+    --scrolltop-bg: #21262d;
+    --scrolltop-hover: #30363d;
+    --img-placeholder: linear-gradient(135deg, #21262d 0%, #30363d 100%);
+  }
+
   body {
-    background: #fff;
+    background: var(--bg);
+    color: var(--text2);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── Reading Progress Bar ── */
+  #progressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), #e63946);
+    box-shadow: 0 0 8px rgba(200,0,26,0.4);
+    z-index: 200;
+    transition: width 0.1s linear;
+    pointer-events: none;
   }
 
   /* ── Top nav ── */
   .article-nav {
-    border-bottom: 1px solid #e8e4df;
+    border-bottom: 1px solid var(--border);
     padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    background: rgba(255,255,255,0.95);
+    background: var(--nav-bg);
     backdrop-filter: blur(8px);
-    z-index: 50;
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
   }
   .article-nav-logo {
     font-family: 'Barlow Condensed', sans-serif;
@@ -30,8 +106,13 @@
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #1a1a18;
+    color: var(--text);
     text-decoration: none;
+  }
+  .article-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
   .article-nav-links {
     display: flex;
@@ -41,13 +122,38 @@
   .article-nav-links a {
     font-family: 'Barlow', sans-serif;
     font-size: 14px;
-    color: #666;
+    color: var(--text-muted2);
     text-decoration: none;
     font-weight: 500;
+    transition: color 0.2s;
   }
-  .article-nav-links a:hover { color: #1a1a18; }
+  .article-nav-links a:hover { color: var(--text); }
+
+  /* Dark mode toggle */
+  .dark-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted2);
+    transition: color 0.2s, background 0.2s;
+  }
+  .dark-toggle:hover {
+    color: var(--text);
+    background: var(--share-bg);
+  }
+  .dark-toggle svg { width: 18px; height: 18px; }
+  .dark-toggle .icon-moon { display: block; }
+  .dark-toggle .icon-sun { display: none; }
+  html.dark .dark-toggle .icon-moon { display: none; }
+  html.dark .dark-toggle .icon-sun { display: block; }
+
   .subscribe-btn {
-    background: #c8001a;
+    background: var(--accent);
     color: #fff;
     border: none;
     padding: 7px 18px;
@@ -57,14 +163,198 @@
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
+    transition: background 0.2s;
   }
-  .subscribe-btn:hover { background: #a5001a; }
+  .subscribe-btn:hover { background: var(--accent-hover); }
+
+  /* ── Layout wrapper for TOC sidebar ── */
+  .article-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+
+  /* ── TOC Sidebar (Desktop) ── */
+  .toc-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    display: none;
+    padding-top: 48px;
+  }
+  .toc-sidebar.visible {
+    display: block;
+  }
+  .toc-sidebar-inner {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 20px;
+  }
+  .toc-sidebar-inner::-webkit-scrollbar { width: 2px; }
+  .toc-sidebar-inner::-webkit-scrollbar-thumb { background: var(--border); }
+  .toc-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted3);
+    margin-bottom: 12px;
+  }
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .toc-list li {
+    margin-bottom: 0;
+  }
+  .toc-list a {
+    display: block;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    color: var(--toc-text);
+    text-decoration: none;
+    padding: 4px 0 4px 12px;
+    border-left: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    line-height: 1.4;
+  }
+  .toc-list a:hover {
+    color: var(--text);
+  }
+  .toc-list a.active {
+    color: var(--toc-active);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .toc-list a.toc-h3 {
+    padding-left: 24px;
+    font-size: 12px;
+  }
+
+  /* TOC Mobile (collapsible) */
+  .toc-mobile {
+    display: none;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .toc-mobile.visible {
+    display: block;
+  }
+  .toc-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    transition: background 0.3s, color 0.3s;
+  }
+  .toc-mobile-header svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s;
+  }
+  .toc-mobile.open .toc-mobile-header svg {
+    transform: rotate(180deg);
+  }
+  .toc-mobile-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .toc-mobile.open .toc-mobile-body {
+    max-height: 500px;
+  }
+  .toc-mobile-body .toc-list {
+    padding: 8px 16px 12px;
+  }
+  .toc-mobile-body .toc-list a {
+    padding: 5px 0 5px 12px;
+  }
+
+  /* ── Social Sharing (Desktop sidebar) ── */
+  .share-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .share-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--share-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted3);
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .share-btn:hover {
+    background: var(--share-hover);
+    color: var(--text);
+    transform: scale(1.1);
+  }
+  .share-btn svg { width: 16px; height: 16px; }
+  .share-tooltip {
+    position: absolute;
+    left: 44px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--text);
+    color: var(--bg);
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .share-tooltip.show { opacity: 1; }
+
+  /* Social Sharing (Mobile) */
+  .share-mobile {
+    display: none;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .share-mobile .share-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .share-mobile .share-tooltip {
+    left: 50%;
+    top: -32px;
+    transform: translateX(-50%);
+  }
 
   /* ── Article container ── */
   .article-container {
     max-width: 680px;
     margin: 0 auto;
     padding: 48px 24px 40px;
+    flex: 1;
+    min-width: 0;
   }
 
   /* ── Header ── */
@@ -74,7 +364,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: #c8001a;
+    color: var(--accent);
     margin-bottom: 16px;
   }
   .article-title {
@@ -82,32 +372,35 @@
     font-size: 42px;
     font-weight: 900;
     line-height: 1.12;
-    color: #1a1a18;
+    color: var(--text);
     margin-bottom: 16px;
     letter-spacing: -0.5px;
+    transition: color 0.3s;
   }
   .article-subtitle {
     font-size: 20px;
-    color: #555;
+    color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 28px;
     font-weight: 400;
+    transition: color 0.3s;
   }
 
-  /* ── Author row (Substack style) ── */
+  /* ── Author row ── */
   .author-row {
     display: flex;
     align-items: center;
     gap: 12px;
     padding-bottom: 24px;
-    border-bottom: 1px solid #e8e4df;
+    border-bottom: 1px solid var(--border);
     margin-bottom: 32px;
+    transition: border-color 0.3s;
   }
   .author-avatar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #c8001a 0%, #1a1a18 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, #1a1a18 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -121,12 +414,14 @@
   .author-name {
     font-weight: 600;
     font-size: 15px;
-    color: #1a1a18;
+    color: var(--text);
+    transition: color 0.3s;
   }
   .author-details {
     font-size: 13px;
-    color: #888;
+    color: var(--text-muted3);
     margin-top: 2px;
+    transition: color 0.3s;
   }
   .author-details span { margin-right: 6px; }
 
@@ -137,23 +432,43 @@
   .article-cover {
     width: 100%;
     display: block;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .article-cover.loaded {
+    opacity: 1;
   }
 
-  /* ── Article body — Substack typography ── */
+  /* ── Article body — Enhanced typography ── */
   .article-body {
     font-family: 'Barlow', sans-serif;
     font-size: 18px;
-    line-height: 1.85;
-    color: #292929;
+    line-height: 1.9;
+    color: var(--text2);
     word-wrap: break-word;
+    transition: color 0.3s;
   }
+
+  /* Drop cap on first paragraph */
+  .article-body > p:first-of-type::first-letter {
+    font-family: 'Playfair Display', serif;
+    float: left;
+    font-size: 3.8em;
+    line-height: 0.8;
+    padding-right: 10px;
+    padding-top: 6px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
   .article-body h2 {
     font-family: 'Playfair Display', serif;
     font-size: 28px;
     font-weight: 700;
     line-height: 1.2;
     margin: 48px 0 16px;
-    color: #1a1a18;
+    color: var(--text);
+    transition: color 0.3s;
   }
   .article-body h3 {
     font-family: 'Barlow', sans-serif;
@@ -161,42 +476,45 @@
     font-weight: 700;
     line-height: 1.3;
     margin: 40px 0 12px;
-    color: #1a1a18;
+    color: var(--text);
+    transition: color 0.3s;
   }
   .article-body p {
     margin-bottom: 22px;
   }
   .article-body strong {
     font-weight: 700;
-    color: #1a1a18;
+    color: var(--text);
   }
   .article-body em {
     font-style: italic;
   }
   .article-body a {
-    color: #c8001a;
+    color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 3px;
+    transition: color 0.2s;
   }
   .article-body a:hover {
-    color: #a5001a;
+    color: var(--accent-hover);
   }
 
-  /* ── Blockquote ── */
+  /* Blockquote */
   .article-body blockquote {
-    border-left: 3px solid #c8001a;
+    border-left: 3px solid var(--accent);
     padding: 4px 0 4px 24px;
     margin: 32px 0;
-    color: #555;
+    color: var(--text-muted);
     font-size: 19px;
     font-style: italic;
     line-height: 1.7;
+    transition: color 0.3s, border-color 0.3s;
   }
   .article-body blockquote p {
     margin-bottom: 8px;
   }
 
-  /* ── Lists ── */
+  /* Lists */
   .article-body ul, .article-body ol {
     margin: 20px 0;
     padding-left: 28px;
@@ -206,12 +524,17 @@
     line-height: 1.7;
   }
 
-  /* ── Images (Substack-style: wider than text) ── */
+  /* Images */
   .article-body img {
     display: block;
     max-width: calc(100% + 80px);
     margin: 36px -40px;
     border-radius: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .article-body img.loaded {
+    opacity: 1;
   }
   .article-body figure {
     margin: 36px -40px;
@@ -223,96 +546,194 @@
   }
   .article-body figcaption {
     font-size: 14px;
-    color: #999;
+    color: var(--text-muted4);
     text-align: center;
     margin-top: 10px;
     padding: 0 40px;
     font-style: italic;
     line-height: 1.5;
+    transition: color 0.3s;
   }
 
-  /* ── Code ── */
+  /* Code */
   .article-body code {
-    background: #f3f0ec;
+    background: var(--code-bg);
     padding: 2px 7px;
     border-radius: 3px;
     font-size: 0.88em;
     font-family: 'SF Mono', 'Fira Code', monospace;
-    color: #c8001a;
+    color: var(--accent);
+    transition: background 0.3s;
   }
   .article-body pre {
-    background: #1a1a18;
-    color: #e6e6e6;
+    background: var(--code-block-bg);
+    color: var(--code-block-text);
     padding: 24px;
     border-radius: 8px;
     overflow-x: auto;
     margin: 32px 0;
     font-size: 14px;
     line-height: 1.6;
+    transition: background 0.3s;
   }
   .article-body pre code {
     background: none;
     padding: 0;
-    color: #e6e6e6;
+    color: var(--code-block-text);
     font-size: 14px;
   }
 
-  /* ── Horizontal rule ── */
+  /* Horizontal rule */
   .article-body hr {
     border: none;
     height: 1px;
-    background: #e8e4df;
+    background: var(--border);
     margin: 40px 0;
+    transition: background 0.3s;
   }
 
-  /* ── Divider (three dots — Substack style) ── */
+  /* Divider */
   .article-divider {
     text-align: center;
     margin: 40px 0;
-    color: #ccc;
+    color: var(--border);
     font-size: 24px;
     letter-spacing: 12px;
+  }
+
+  /* ── Related Articles ── */
+  .related-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    transition: border-color 0.3s;
+  }
+  .related-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 24px;
+    transition: color 0.3s;
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .related-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.3s, transform 0.2s, background 0.3s, border-color 0.3s;
+    box-shadow: var(--card-shadow);
+  }
+  .related-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+  .related-card-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+  }
+  .related-card-placeholder {
+    width: 100%;
+    height: 140px;
+    background: var(--img-placeholder);
+  }
+  .related-card-body {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .related-card-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .related-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 6px;
+    transition: color 0.3s;
+  }
+  .related-card-excerpt {
+    font-size: 13px;
+    color: var(--text-muted2);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.3s;
+  }
+  .related-card-date {
+    font-size: 12px;
+    color: var(--text-muted3);
+    transition: color 0.3s;
   }
 
   /* ── Footer CTA ── */
   .article-footer {
     margin-top: 48px;
     padding-top: 32px;
-    border-top: 1px solid #e8e4df;
+    border-top: 1px solid var(--border);
+    transition: border-color 0.3s;
   }
   .article-footer-cta {
-    background: #faf8f4;
-    border: 1px solid #e8e4df;
+    background: var(--cta-bg);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 32px;
     text-align: center;
+    transition: background 0.3s, border-color 0.3s;
   }
   .article-footer-cta h3 {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 700;
-    color: #1a1a18;
+    color: var(--text);
     margin-bottom: 8px;
+    transition: color 0.3s;
   }
   .article-footer-cta p {
     font-size: 15px;
-    color: #666;
+    color: var(--text-muted2);
     margin-bottom: 20px;
     line-height: 1.5;
+    transition: color 0.3s;
   }
   .cta-subscribe {
     display: inline-block;
-    background: #c8001a;
+    background: var(--accent);
     color: #fff;
     padding: 12px 32px;
     border-radius: 5px;
     font-weight: 600;
     font-size: 15px;
     text-decoration: none;
+    transition: background 0.2s;
   }
-  .cta-subscribe:hover { background: #a5001a; }
+  .cta-subscribe:hover { background: var(--accent-hover); }
 
-  /* ── Back to top ── */
+  /* ── Back link ── */
   .back-home {
     display: block;
     text-align: center;
@@ -320,7 +741,7 @@
     padding-bottom: 48px;
     font-size: 14px;
     font-weight: 600;
-    color: #c8001a;
+    color: var(--accent);
     text-decoration: none;
   }
   .back-home:hover { text-decoration: underline; }
@@ -329,14 +750,58 @@
   .article-not-found {
     text-align: center;
     padding: 100px 24px;
-    color: #888;
+    color: var(--text-muted3);
     font-size: 18px;
   }
   .article-not-found a {
-    color: #c8001a;
+    color: var(--accent);
   }
 
+  /* ── Scroll to Top ── */
+  .scroll-top-btn {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--scrolltop-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s, background 0.2s, color 0.2s, border-color 0.3s;
+    z-index: 50;
+  }
+  .scroll-top-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .scroll-top-btn:hover {
+    background: var(--scrolltop-hover);
+    color: var(--text);
+  }
+  .scroll-top-btn svg { width: 18px; height: 18px; }
+
   /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .toc-sidebar { display: none !important; }
+    .toc-mobile.visible { display: block; }
+    .share-mobile.visible { display: flex; }
+    .article-layout { display: block; }
+  }
+
+  @media (min-width: 1101px) {
+    .toc-mobile { display: none !important; }
+    .share-mobile { display: none !important; }
+  }
+
   @media (max-width: 720px) {
     .article-title { font-size: 32px; }
     .article-subtitle { font-size: 17px; }
@@ -355,10 +820,19 @@
     .article-cover-wrap {
       margin: 0 -20px 28px;
     }
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+    .related-card-img, .related-card-placeholder {
+      height: 160px;
+    }
   }
 
   @media (max-width: 480px) {
     .article-title { font-size: 26px; }
+    .article-body > p:first-of-type::first-letter {
+      font-size: 3em;
+    }
     .article-body img {
       max-width: 100%;
       margin: 24px 0;
@@ -373,28 +847,347 @@
     .article-cover-wrap {
       margin: 0 0 24px;
     }
+    .article-nav-links { display: none; }
+    .scroll-top-btn {
+      bottom: 20px;
+      right: 20px;
+      width: 38px;
+      height: 38px;
+    }
+  }
+
+  /* ── Print Styles ── */
+  @media print {
+    #progressBar,
+    .article-nav,
+    .toc-sidebar,
+    .toc-mobile,
+    .share-sidebar,
+    .share-mobile,
+    .article-footer,
+    .back-home,
+    .scroll-top-btn,
+    .related-section {
+      display: none !important;
+    }
+    body {
+      background: #fff;
+      color: #000;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 12pt;
+      line-height: 1.6;
+    }
+    .article-container {
+      max-width: 100%;
+      padding: 0;
+    }
+    .article-title {
+      font-size: 28pt;
+      color: #000;
+    }
+    .article-subtitle {
+      color: #333;
+    }
+    .article-body {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 12pt;
+      color: #000;
+      line-height: 1.6;
+    }
+    .article-body h2 {
+      page-break-before: always;
+      color: #000;
+    }
+    .article-body h3 {
+      color: #000;
+    }
+    .article-body a {
+      color: #000;
+      text-decoration: underline;
+    }
+    .article-body a[href]::after {
+      content: " (" attr(href) ")";
+      font-size: 0.85em;
+      color: #555;
+    }
+    .article-body pre {
+      border: 1px solid #ccc;
+      background: #f8f8f8;
+      color: #000;
+    }
+    .article-body pre code {
+      color: #000;
+    }
+    .article-body blockquote {
+      border-left-color: #999;
+      color: #333;
+    }
+    .article-cover-wrap {
+      margin: 0 0 24px;
+    }
+    .article-body img {
+      max-width: 100%;
+      margin: 20px 0;
+    }
+    .article-body figure {
+      margin: 20px 0;
+    }
+    .author-row {
+      border-bottom-color: #ccc;
+    }
+    .article-body > p:first-of-type::first-letter {
+      color: #000;
+    }
   }
 </style>
 </head>
 <body>
 
+<!-- Progress bar -->
+<div id="progressBar"></div>
+
 <!-- Nav -->
 <div class="article-nav">
   <a href="/" class="article-nav-logo">Inflex Trades</a>
-  <div style="display:flex;align-items:center;gap:16px;">
+  <div class="article-nav-right">
     <ul class="article-nav-links">
       <li><a href="/#insights">Insights</a></li>
       <li><a href="/#about">About</a></li>
     </ul>
+    <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
     <a href="/#newsletter" class="subscribe-btn">Subscribe</a>
   </div>
 </div>
 
-<div class="article-container" id="articlePage">
-  <div style="text-align:center;padding:80px;color:#888;">Loading article...</div>
+<!-- Scroll to Top -->
+<button class="scroll-top-btn" id="scrollTopBtn" aria-label="Scroll to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- Article layout wrapper -->
+<div class="article-layout">
+  <!-- TOC sidebar (desktop) -->
+  <aside class="toc-sidebar" id="tocSidebar">
+    <div class="toc-sidebar-inner">
+      <div class="toc-title">Contents</div>
+      <ul class="toc-list" id="tocDesktopList"></ul>
+      <div class="share-sidebar" id="shareSidebar"></div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="article-container" id="articlePage">
+    <div style="text-align:center;padding:80px;color:var(--text-muted3);">Loading article...</div>
+  </div>
 </div>
 
 <script>
+/* ── Smooth scroll for all anchors ── */
+document.documentElement.style.scrollBehavior = 'smooth';
+
+/* ── Dark mode ── */
+(function() {
+  const isDark = localStorage.getItem('inflex-dark-mode') === 'true';
+  if (isDark) document.documentElement.classList.add('dark');
+})();
+
+document.getElementById('darkToggle').addEventListener('click', function() {
+  const html = document.documentElement;
+  html.classList.toggle('dark');
+  localStorage.setItem('inflex-dark-mode', html.classList.contains('dark'));
+});
+
+/* ── Helpers ── */
+function esc(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+function escAttr(text) {
+  return text.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatDate(str) {
+  if (!str) return '';
+  const d = new Date(str);
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+/* ── Sharing icons (inline SVG) ── */
+const ICON_TWITTER = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+const ICON_LINKEDIN = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>';
+const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+function buildShareButtons(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const title = encodeURIComponent(document.title);
+  const url = encodeURIComponent(window.location.href);
+
+  container.innerHTML = `
+    <button class="share-btn" onclick="window.open('https://twitter.com/intent/tweet?text=${title}&url=${url}','_blank','width=550,height=420')" aria-label="Share on Twitter">
+      ${ICON_TWITTER}
+    </button>
+    <button class="share-btn" onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=${url}','_blank','width=550,height=420')" aria-label="Share on LinkedIn">
+      ${ICON_LINKEDIN}
+    </button>
+    <button class="share-btn" id="copyBtn_${containerId}" aria-label="Copy link">
+      ${ICON_COPY}
+      <span class="share-tooltip" id="copyTooltip_${containerId}">Copied!</span>
+    </button>
+  `;
+
+  document.getElementById(`copyBtn_${containerId}`).addEventListener('click', function() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+      const tooltip = document.getElementById(`copyTooltip_${containerId}`);
+      tooltip.classList.add('show');
+      setTimeout(function() { tooltip.classList.remove('show'); }, 2000);
+    });
+  });
+}
+
+/* ── Reading Progress Bar ── */
+function updateProgressBar() {
+  const articleBody = document.querySelector('.article-body');
+  if (!articleBody) return;
+
+  const rect = articleBody.getBoundingClientRect();
+  const bodyTop = rect.top + window.scrollY;
+  const bodyHeight = articleBody.offsetHeight;
+  const scrolled = window.scrollY - bodyTop;
+  const total = bodyHeight - window.innerHeight;
+
+  let progress = 0;
+  if (total > 0) {
+    progress = Math.min(100, Math.max(0, (scrolled / total) * 100));
+  }
+  document.getElementById('progressBar').style.width = progress + '%';
+}
+
+/* ── Scroll to Top Button ── */
+function updateScrollTopBtn() {
+  const authorRow = document.querySelector('.author-row');
+  if (!authorRow) return;
+  const btn = document.getElementById('scrollTopBtn');
+  const threshold = authorRow.getBoundingClientRect().bottom + window.scrollY;
+  if (window.scrollY > threshold) {
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+}
+
+document.getElementById('scrollTopBtn').addEventListener('click', function() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+window.addEventListener('scroll', function() {
+  updateProgressBar();
+  updateScrollTopBtn();
+}, { passive: true });
+
+/* ── TOC Builder ── */
+function buildTOC() {
+  const articleBody = document.querySelector('.article-body');
+  if (!articleBody) return;
+
+  const headings = articleBody.querySelectorAll('h2, h3');
+  if (headings.length < 3) return;
+
+  // Assign IDs to headings
+  const tocItems = [];
+  headings.forEach(function(h, i) {
+    const id = 'heading-' + i;
+    h.id = id;
+    tocItems.push({
+      id: id,
+      text: h.textContent,
+      level: h.tagName.toLowerCase()
+    });
+  });
+
+  function renderTocList(items) {
+    return items.map(function(item) {
+      const cls = item.level === 'h3' ? ' class="toc-h3"' : '';
+      return '<li><a href="#' + item.id + '"' + cls + ' data-target="' + item.id + '">' + esc(item.text) + '</a></li>';
+    }).join('');
+  }
+
+  // Desktop TOC
+  const sidebar = document.getElementById('tocSidebar');
+  document.getElementById('tocDesktopList').innerHTML = renderTocList(tocItems);
+  sidebar.classList.add('visible');
+
+  // Mobile TOC
+  const mobileToc = document.getElementById('tocMobile');
+  if (mobileToc) {
+    document.getElementById('tocMobileList').innerHTML = renderTocList(tocItems);
+    mobileToc.classList.add('visible');
+  }
+
+  // Mobile toggle
+  const mobileHeader = document.querySelector('.toc-mobile-header');
+  if (mobileHeader) {
+    mobileHeader.addEventListener('click', function() {
+      mobileToc.classList.toggle('open');
+    });
+  }
+
+  // Smooth scroll on TOC click
+  document.querySelectorAll('.toc-list a').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.getElementById(this.dataset.target);
+      if (target) {
+        const offset = 70;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+      // Close mobile TOC
+      if (mobileToc) mobileToc.classList.remove('open');
+    });
+  });
+
+  // IntersectionObserver for active section
+  const observerOptions = {
+    root: null,
+    rootMargin: '-80px 0px -70% 0px',
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.toc-list a').forEach(function(a) {
+          a.classList.remove('active');
+        });
+        document.querySelectorAll('.toc-list a[data-target="' + entry.target.id + '"]').forEach(function(a) {
+          a.classList.add('active');
+        });
+      }
+    });
+  }, observerOptions);
+
+  headings.forEach(function(h) { observer.observe(h); });
+}
+
+/* ── Image fade-in on load ── */
+function setupImageFadeIn() {
+  document.querySelectorAll('.article-body img, .article-cover').forEach(function(img) {
+    if (img.complete) {
+      img.classList.add('loaded');
+    } else {
+      img.addEventListener('load', function() { this.classList.add('loaded'); });
+    }
+  });
+}
+
+/* ── Load Article ── */
 async function loadArticle() {
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('slug');
@@ -411,6 +1204,9 @@ async function loadArticle() {
     const a = await res.json();
 
     document.title = `${a.title} — Inflex Trades`;
+
+    // Fire view count (fire and forget)
+    fetch(`/api/articles/${encodeURIComponent(slug)}/view`, { method: 'POST' }).catch(function(){});
 
     let html = '';
 
@@ -430,15 +1226,32 @@ async function loadArticle() {
     // Author row
     const authorName = a.author || 'Inflex Research';
     const initials = authorName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const viewsText = a.views ? `<span>·</span><span>${Number(a.views).toLocaleString()} views</span>` : '';
     html += `
-      <div class="author-row">
+      <div class="author-row" id="authorRow">
         <div class="author-avatar">${initials}</div>
         <div class="author-info">
           <div class="author-name">${esc(authorName)}</div>
           <div class="author-details">
             <span>${formatDate(a.created_at)}</span>
             ${a.read_time ? `<span>·</span><span>${esc(a.read_time)}</span>` : ''}
+            ${viewsText}
           </div>
+        </div>
+      </div>`;
+
+    // Mobile share buttons
+    html += `<div class="share-mobile" id="shareMobile"></div>`;
+
+    // Mobile TOC
+    html += `
+      <div class="toc-mobile" id="tocMobile">
+        <div class="toc-mobile-header">
+          <span>Table of Contents</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="toc-mobile-body">
+          <ul class="toc-list" id="tocMobileList"></ul>
         </div>
       </div>`;
 
@@ -450,6 +1263,35 @@ async function loadArticle() {
     // Body
     html += `<div class="article-body">${a.content}</div>`;
 
+    // Related articles
+    if (a.related && a.related.length > 0) {
+      html += `
+        <div class="related-section">
+          <h2 class="related-heading">Keep Reading</h2>
+          <div class="related-grid">`;
+
+      a.related.forEach(function(r) {
+        const imgHtml = r.cover_image
+          ? `<img class="related-card-img" src="${escAttr(r.cover_image)}" alt="">`
+          : `<div class="related-card-placeholder"></div>`;
+
+        html += `
+          <a href="/article.html?slug=${encodeURIComponent(r.slug)}" class="related-card">
+            ${imgHtml}
+            <div class="related-card-body">
+              <div class="related-card-tag">${esc(r.tag || 'Article')}</div>
+              <div class="related-card-title">${esc(r.title)}</div>
+              <p class="related-card-excerpt">${esc(r.excerpt || '')}</p>
+              <div class="related-card-date">${formatDate(r.created_at)}</div>
+            </div>
+          </a>`;
+      });
+
+      html += `
+          </div>
+        </div>`;
+    }
+
     // Footer CTA
     html += `
       <div class="article-footer">
@@ -459,29 +1301,26 @@ async function loadArticle() {
           <a href="/#newsletter" class="cta-subscribe">Subscribe to Inflex</a>
         </div>
       </div>
-      <a href="/" class="back-home">← Back to all articles</a>`;
+      <a href="/" class="back-home">&larr; Back to all articles</a>`;
 
     document.getElementById('articlePage').innerHTML = html;
+
+    // Post-render setup
+    buildTOC();
+    buildShareButtons('shareSidebar');
+    buildShareButtons('shareMobile');
+    setupImageFadeIn();
+    updateProgressBar();
+    updateScrollTopBtn();
+
+    // Show mobile share
+    const shareMobile = document.getElementById('shareMobile');
+    if (shareMobile) shareMobile.classList.add('visible');
+
   } catch (e) {
     document.getElementById('articlePage').innerHTML =
       '<div class="article-not-found">Article not found. <a href="/">Go back home</a></div>';
   }
-}
-
-function esc(text) {
-  const d = document.createElement('div');
-  d.textContent = text;
-  return d.innerHTML;
-}
-
-function escAttr(text) {
-  return text.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function formatDate(str) {
-  if (!str) return '';
-  const d = new Date(str);
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 loadArticle();

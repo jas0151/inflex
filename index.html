@@ -7,7 +7,7 @@
 <meta name="description" content="Inflex Trades — Infinite Reflexes in a market full of infinite outcomes. Precision trading research and insights in digital assets.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="inflex.css">
-
+<script>if(localStorage.getItem('inflex-dark-mode')==='true')document.documentElement.classList.add('dark');</script>
 </head>
 <body>
 
@@ -21,9 +21,25 @@
       <li><a href="#research">Research</a></li>
       <li><a href="inflex-terminal.html">Terminal</a></li>
     </ul>
-    <a href="#newsletter" class="nav-cta">Subscribe</a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="#newsletter" class="nav-cta">Subscribe</a>
+      <button class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('mobileMenu').classList.toggle('show')">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
   </div>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#insights" onclick="this.parentElement.classList.remove('show')">Insights</a>
+  <a href="#about" onclick="this.parentElement.classList.remove('show')">About</a>
+  <a href="#research" onclick="this.parentElement.classList.remove('show')">Research</a>
+  <a href="inflex-terminal.html">Terminal</a>
+  <a href="#newsletter" onclick="this.parentElement.classList.remove('show')">Subscribe</a>
+</div>
 
 <!-- TICKER -->
 <div class="ticker-bar">
@@ -81,15 +97,37 @@
 <section class="section" id="insights">
   <div class="section-header">
     <h2 class="section-title">Latest Insights</h2>
-    <span class="section-meta">March 2026</span>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="insights-search">
+        <input type="text" id="articleSearchInput" placeholder="Search articles..." oninput="filterArticlesSearch()">
+      </div>
+      <span class="section-meta">March 2026</span>
+    </div>
   </div>
 
   <!-- Featured (loaded dynamically from API) -->
+  <div id="featuredSkeleton" class="skeleton-featured">
+    <div class="skeleton skeleton-featured-img"></div>
+    <div class="skeleton-featured-body">
+      <div class="skeleton skeleton-tag"></div>
+      <div class="skeleton skeleton-title" style="height:24px;width:70%;"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text-sm"></div>
+    </div>
+  </div>
   <div class="featured" id="featuredArticle" style="display:none;"></div>
 
   <!-- Article grid (loaded dynamically from API) -->
-  <div class="article-grid" id="articleGrid">
-    <div class="article-card"><p class="card-excerpt" style="text-align:center;padding:20px;color:#aaa;">Loading articles...</p></div>
+  <div id="articleSkeleton" class="article-grid">
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div></div>
+  </div>
+  <div class="article-grid" id="articleGrid" style="display:none;"></div>
+
+  <!-- Load more button -->
+  <div class="articles-load-more" id="loadMoreWrap" style="display:none;">
+    <button onclick="showMoreArticles()">Load more articles</button>
   </div>
 </section>
 
@@ -163,6 +201,11 @@
     </div>
   </div>
 </div>
+
+<!-- Scroll to top -->
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
+  <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
 
 <!-- FOOTER -->
 <footer>
@@ -445,74 +488,146 @@ function loadMoreProtocols() {
 }
 
 // ── ARTICLES ──
+let allLoadedArticles = [];
+let articlesPerPage = 6;
+let articlesShown = 6;
+
 async function loadArticles() {
   try {
     const res = await fetch('/api/articles');
-    const articles = await res.json();
+    allLoadedArticles = await res.json();
+
+    // Hide skeletons
+    const skelFeatured = document.getElementById('featuredSkeleton');
+    const skelGrid = document.getElementById('articleSkeleton');
+    if (skelFeatured) skelFeatured.style.display = 'none';
+    if (skelGrid) skelGrid.style.display = 'none';
+
     const featuredEl = document.getElementById('featuredArticle');
     const grid = document.getElementById('articleGrid');
+    grid.style.display = '';
 
-    if (!articles.length) {
+    if (!allLoadedArticles.length) {
       featuredEl.style.display = 'none';
-      grid.innerHTML = '<div class="article-card"><p class="card-excerpt" style="text-align:center;padding:20px;color:#aaa;">No articles published yet.</p></div>';
+      grid.innerHTML = '<div class="articles-empty"><div class="articles-empty-icon">&#9998;</div><div class="articles-empty-text">No articles published yet</div><div class="articles-empty-hint">Check back soon for new research and insights.</div></div>';
       return;
     }
 
-    // Find featured article (most recent one marked featured, or fallback to first)
-    const featured = articles.find(a => a.is_featured) || articles[0];
-    const rest = articles.filter(a => a.id !== featured.id).slice(0, 6);
+    renderArticles(allLoadedArticles);
+  } catch (e) {
+    const skelFeatured = document.getElementById('featuredSkeleton');
+    const skelGrid = document.getElementById('articleSkeleton');
+    if (skelFeatured) skelFeatured.style.display = 'none';
+    if (skelGrid) skelGrid.style.display = 'none';
+    document.getElementById('articleGrid').style.display = '';
+    document.getElementById('articleGrid').innerHTML = '<div class="articles-empty"><div class="articles-empty-text">Failed to load articles</div><div class="articles-empty-hint">Please check your connection and try again.</div></div>';
+  }
+}
 
-    // Render featured
-    const coverStyle = featured.cover_image
-      ? `background-image:url('${featured.cover_image}');background-size:cover;background-position:center;`
-      : '';
-    featuredEl.style.display = 'grid';
-    featuredEl.innerHTML = `
-      <a href="/article.html?slug=${encodeURIComponent(featured.slug)}" class="featured-visual" style="${coverStyle}text-decoration:none;">
-        <div class="chart-lines" ${coverStyle ? 'style="display:none"' : ''}>
-          <svg viewBox="0 0 500 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-            <line x1="0" y1="160" x2="500" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-            <line x1="0" y1="240" x2="500" y2="240" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-            <polyline points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60" fill="none" stroke="rgba(200,0,26,0.6)" stroke-width="2"/>
-            <polygon points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60 500,320 0,320" fill="rgba(200,0,26,0.06)"/>
-          </svg>
-        </div>
-        <div class="featured-visual-tag">Featured Research</div>
-      </a>
-      <a href="/article.html?slug=${encodeURIComponent(featured.slug)}" class="featured-content" style="text-decoration:none;color:inherit;">
-        <div>
-          <div class="featured-tag">${escHtmlSafe(featured.tag || 'Featured')}</div>
-          <h3 class="featured-title">${escHtmlSafe(featured.title)}</h3>
-          <p class="featured-excerpt">${escHtmlSafe(featured.excerpt || '')}</p>
-        </div>
-        <div class="article-meta">
-          <span class="article-byline">${escHtmlSafe(featured.author || 'Inflex Research')} · ${escHtmlSafe(featured.read_time || '')}</span>
-          <span class="read-more">Read full piece →</span>
-        </div>
-      </a>`;
+function renderArticles(articles) {
+  const featuredEl = document.getElementById('featuredArticle');
+  const grid = document.getElementById('articleGrid');
 
-    // Render grid
-    if (!rest.length) {
-      grid.innerHTML = '';
-      return;
-    }
-    grid.innerHTML = rest.map(a => `
-      <a href="/article.html?slug=${encodeURIComponent(a.slug)}" class="article-card" style="text-decoration:none;color:inherit;">
-        ${a.cover_image ? `<img src="${escAttrSafe(a.cover_image)}" style="width:100%;height:140px;object-fit:cover;border-radius:4px;margin-bottom:14px;" alt="">` : ''}
+  if (!articles.length) {
+    featuredEl.style.display = 'none';
+    grid.innerHTML = '<div class="search-no-results"><h3>No articles found</h3><p>Try a different search term.</p></div>';
+    document.getElementById('loadMoreWrap').style.display = 'none';
+    return;
+  }
+
+  // Find featured article
+  const featured = articles.find(a => a.is_featured) || articles[0];
+  const rest = articles.filter(a => a.id !== featured.id);
+  const displayRest = rest.slice(0, articlesShown);
+
+  // Render featured
+  const coverStyle = featured.cover_image
+    ? `background-image:url('${featured.cover_image}');background-size:cover;background-position:center;`
+    : '';
+  featuredEl.style.display = 'grid';
+  featuredEl.innerHTML = `
+    <a href="/article.html?slug=${encodeURIComponent(featured.slug)}" class="featured-visual" style="${coverStyle}text-decoration:none;">
+      <div class="chart-lines" ${coverStyle ? 'style="display:none"' : ''}>
+        <svg viewBox="0 0 500 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <line x1="0" y1="160" x2="500" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <line x1="0" y1="240" x2="500" y2="240" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <polyline points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60" fill="none" stroke="rgba(200,0,26,0.6)" stroke-width="2"/>
+          <polygon points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60 500,320 0,320" fill="rgba(200,0,26,0.06)"/>
+        </svg>
+      </div>
+      <div class="featured-visual-tag">Featured Research</div>
+    </a>
+    <a href="/article.html?slug=${encodeURIComponent(featured.slug)}" class="featured-content" style="text-decoration:none;color:inherit;">
+      <div>
+        <div class="featured-tag">${escHtmlSafe(featured.tag || 'Featured')}</div>
+        <h3 class="featured-title">${escHtmlSafe(featured.title)}</h3>
+        <p class="featured-excerpt">${escHtmlSafe(featured.excerpt || '')}</p>
+      </div>
+      <div class="article-meta">
+        <span class="article-byline">${escHtmlSafe(featured.author || 'Inflex Research')} · ${escHtmlSafe(featured.read_time || '')}</span>
+        <span class="read-more">Read full piece &#8594;</span>
+      </div>
+    </a>`;
+
+  // Render grid
+  if (!displayRest.length) {
+    grid.innerHTML = '';
+    document.getElementById('loadMoreWrap').style.display = 'none';
+    return;
+  }
+  grid.innerHTML = displayRest.map((a, i) => `
+    <a href="/article.html?slug=${encodeURIComponent(a.slug)}" class="article-card reveal reveal-delay-${(i % 3) + 1}" style="text-decoration:none;color:inherit;">
+      <div class="card-img-wrap">
+        ${a.cover_image
+          ? `<img src="${escAttrSafe(a.cover_image)}" alt="" loading="lazy">`
+          : `<div class="card-img-placeholder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z"/></svg></div>`}
+      </div>
+      <div class="card-body">
         <div class="card-tag">${escHtmlSafe(a.tag || 'Article')}</div>
         <div class="card-title">${escHtmlSafe(a.title)}</div>
         <p class="card-excerpt">${escHtmlSafe(a.excerpt || '')}</p>
         <div class="card-footer">
           <span class="card-date">${fmtArticleDate(a.created_at)}</span>
-          <span class="card-arrow">→</span>
+          <span class="card-readtime">${escHtmlSafe(a.read_time || '')}</span>
+          <span class="card-arrow">&#8594;</span>
         </div>
-      </a>
-    `).join('');
-  } catch (e) {
-    // Silently fail — keep loading message or show fallback
-  }
+      </div>
+    </a>
+  `).join('');
+
+  // Load more button
+  const loadMoreWrap = document.getElementById('loadMoreWrap');
+  loadMoreWrap.style.display = rest.length > articlesShown ? 'block' : 'none';
+
+  // Trigger reveal animations
+  requestAnimationFrame(initRevealObserver);
 }
+
+function showMoreArticles() {
+  articlesShown += articlesPerPage;
+  const searchVal = document.getElementById('articleSearchInput').value.toLowerCase();
+  const filtered = searchVal
+    ? allLoadedArticles.filter(a => a.title.toLowerCase().includes(searchVal) || (a.tag||'').toLowerCase().includes(searchVal) || (a.excerpt||'').toLowerCase().includes(searchVal))
+    : allLoadedArticles;
+  renderArticles(filtered);
+}
+
+function filterArticlesSearch() {
+  const q = document.getElementById('articleSearchInput').value.toLowerCase();
+  articlesShown = 6;
+  if (!q) {
+    renderArticles(allLoadedArticles);
+    return;
+  }
+  const filtered = allLoadedArticles.filter(a =>
+    a.title.toLowerCase().includes(q) ||
+    (a.tag||'').toLowerCase().includes(q) ||
+    (a.excerpt||'').toLowerCase().includes(q)
+  );
+  renderArticles(filtered);
+}
+
 function escHtmlSafe(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 function escAttrSafe(t) { return t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmtArticleDate(s) {
@@ -521,12 +636,40 @@ function fmtArticleDate(s) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+// ── DARK MODE ──
+function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('inflex-dark-mode', isDark);
+}
+
+// ── SCROLL TO TOP ──
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+window.addEventListener('scroll', () => {
+  scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+
+// ── SCROLL REVEAL ──
+function initRevealObserver() {
+  const els = document.querySelectorAll('.reveal:not(.revealed)');
+  if (!els.length) return;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('revealed');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(el => obs.observe(el));
+}
+
 // ── INIT ALL ──
 loadMarketData();
 loadBTCEMA();
 loadDefiProtocols();
 loadArticles();
-setInterval(loadMarketData, 120000); // refresh every 2 min
-setInterval(loadBTCEMA, 300000);    // EMA every 5 min</script>
+setInterval(loadMarketData, 120000);
+setInterval(loadBTCEMA, 300000);
+initRevealObserver();</script>
 </body>
 </html>

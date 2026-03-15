@@ -30,10 +30,25 @@ function getDb() {
         read_time TEXT DEFAULT '',
         is_featured INTEGER DEFAULT 0,
         published INTEGER DEFAULT 1,
+        views INTEGER DEFAULT 0,
+        scheduled_at TEXT DEFAULT NULL,
+        meta_description TEXT DEFAULT '',
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       );
     `);
+
+    // Migration: add new columns if they don't exist (safe for existing databases)
+    const cols = db.prepare("PRAGMA table_info(articles)").all().map(c => c.name);
+    if (!cols.includes('views')) {
+      db.exec("ALTER TABLE articles ADD COLUMN views INTEGER DEFAULT 0");
+    }
+    if (!cols.includes('scheduled_at')) {
+      db.exec("ALTER TABLE articles ADD COLUMN scheduled_at TEXT DEFAULT NULL");
+    }
+    if (!cols.includes('meta_description')) {
+      db.exec("ALTER TABLE articles ADD COLUMN meta_description TEXT DEFAULT ''");
+    }
   }
   return db;
 }
