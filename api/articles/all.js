@@ -1,6 +1,6 @@
-const { getSql, initDb } = require('../_db');
+const { getSql, initDb, withErrorHandling } = require('../_db');
 
-module.exports = async function handler(req, res) {
+module.exports = withErrorHandling(async function handler(req, res) {
   await initDb();
   const sql = getSql();
 
@@ -11,4 +11,4 @@ module.exports = async function handler(req, res) {
 
   const rows = await sql`SELECT * FROM articles ORDER BY created_at DESC`;
   return res.json(rows);
-};
+});

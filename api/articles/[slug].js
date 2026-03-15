@@ -1,6 +1,6 @@
-const { getSql, initDb, estimateReadTime } = require('../_db');
+const { getSql, initDb, estimateReadTime, withErrorHandling } = require('../_db');
 
-module.exports = async function handler(req, res) {
+module.exports = withErrorHandling(async function handler(req, res) {
   await initDb();
   const sql = getSql();
   const { slug } = req.query;
@@ -55,4 +55,4 @@ module.exports = async function handler(req, res) {
 
   res.setHeader('Allow', 'GET, PUT, DELETE');
   return res.status(405).json({ error: 'Method not allowed' });
-};
+});

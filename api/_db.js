@@ -5,6 +5,9 @@ let initialized = false;
 
 function getSql() {
   if (!sqlClient) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is not set. Add a Neon Postgres database in your Vercel project settings under Storage.');
+    }
     sqlClient = neon(process.env.DATABASE_URL);
   }
   return sqlClient;
@@ -47,4 +50,17 @@ function estimateReadTime(content) {
   return `${minutes} min read`;
 }
 
-module.exports = { getSql, initDb, slugify, estimateReadTime };
+// Wrap handler with try/catch so errors always return JSON
+function withErrorHandling(handler) {
+  return async (req, res) => {
+    try {
+      await handler(req, res);
+    } catch (err) {
+      console.error('API error:', err);
+      const message = err.message || 'Internal server error';
+      return res.status(500).json({ error: message });
+    }
+  };
+}
+
+module.exports = { getSql, initDb, slugify, estimateReadTime, withErrorHandling };
