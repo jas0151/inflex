@@ -123,62 +123,9 @@
     </div>
   </div>
 
-  <!-- Article grid -->
-  <div class="article-grid">
-    <div class="article-card">
-      <div class="card-tag">DeFi · Analysis</div>
-      <div class="card-title">Angle Protocol Winds Down: What It Tells Us About the Stablecoin Wars</div>
-      <p class="card-excerpt">EURA and USDA are shutting down. The real story isn't the exit — it's what it reveals about the yield-bearing stablecoin thesis and who actually won.</p>
-      <div class="card-footer">
-        <span class="card-date">Mar 5, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Strategy · Arbitrage</div>
-      <div class="card-title">Cross-Platform Arbitrage: A Practical Playbook for 2026</div>
-      <p class="card-excerpt">The same event trades at different prices across Polymarket, Kalshi, and emerging BNB Chain platforms. Here's how to systematically capture that gap.</p>
-      <div class="card-footer">
-        <span class="card-date">Mar 3, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Markets · Macro</div>
-      <div class="card-title">BTC Dominance at 54%: What the Cycle Data Actually Says</div>
-      <p class="card-excerpt">Bitcoin's dominance is hovering at levels that historically precede altseason rotations. We look at what the on-chain data confirms — and what it doesn't.</p>
-      <div class="card-footer">
-        <span class="card-date">Mar 1, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">BNB Chain · Platforms</div>
-      <div class="card-title">Predict.fun, Opinion Labs & Probable: The BNB Prediction Market Trio</div>
-      <p class="card-excerpt">Three new platforms are quietly building prediction market infrastructure on BNB Chain. We profile each and what makes them different from Polymarket.</p>
-      <div class="card-footer">
-        <span class="card-date">Feb 27, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Liquidity · DeFi</div>
-      <div class="card-title">Providing Liquidity in Prediction Markets: The Honest Risk/Reward</div>
-      <p class="card-excerpt">AMM-based prediction markets offer 2–5% APY for liquidity providers. We model the real returns after impermanent loss, fees, and oracle risk.</p>
-      <div class="card-footer">
-        <span class="card-date">Feb 24, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Macro · Fed</div>
-      <div class="card-title">The Fed, Rates, and Crypto: Reading the Polymarket Signal</div>
-      <p class="card-excerpt">Prediction market odds on Fed rate decisions have been a leading indicator — not a lagging one. Here's how to use them before the announcement.</p>
-      <div class="card-footer">
-        <span class="card-date">Feb 20, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
+  <!-- Article grid (loaded dynamically from API) -->
+  <div class="article-grid" id="articleGrid">
+    <div class="article-card"><p class="card-excerpt" style="text-align:center;padding:20px;color:#aaa;">Loading articles...</p></div>
   </div>
 </section>
 
@@ -533,10 +480,43 @@ function loadMoreProtocols() {
   renderProtocols();
 }
 
+// ── ARTICLES ──
+async function loadArticles() {
+  try {
+    const res = await fetch('/api/articles');
+    const articles = await res.json();
+    const grid = document.getElementById('articleGrid');
+    if (!articles.length) {
+      grid.innerHTML = '<div class="article-card"><p class="card-excerpt" style="text-align:center;padding:20px;color:#aaa;">No articles published yet.</p></div>';
+      return;
+    }
+    grid.innerHTML = articles.slice(0, 6).map(a => `
+      <a href="/article.html?slug=${encodeURIComponent(a.slug)}" class="article-card" style="text-decoration:none;color:inherit;">
+        <div class="card-tag">${escHtmlSafe(a.tag || 'Article')}</div>
+        <div class="card-title">${escHtmlSafe(a.title)}</div>
+        <p class="card-excerpt">${escHtmlSafe(a.excerpt || '')}</p>
+        <div class="card-footer">
+          <span class="card-date">${fmtArticleDate(a.created_at)}</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    `).join('');
+  } catch (e) {
+    // Silently fail — keep loading message or show fallback
+  }
+}
+function escHtmlSafe(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function fmtArticleDate(s) {
+  if (!s) return '';
+  const d = new Date(s + 'Z');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 // ── INIT ALL ──
 loadMarketData();
 loadBTCEMA();
 loadDefiProtocols();
+loadArticles();
 setInterval(loadMarketData, 120000); // refresh every 2 min
 setInterval(loadBTCEMA, 300000);    // EMA every 5 min</script>
 </body>

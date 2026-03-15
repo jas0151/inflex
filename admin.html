@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inflex Admin — Article Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #c8001a;
+    --accent-hover: #e0001e;
+    --green: #3fb950;
+    --yellow: #d29922;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .topbar-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 20px;
+  }
+  .topbar-links a:hover { color: var(--text); }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: calc(100vh - 49px);
+  }
+
+  /* Sidebar — article list */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+  }
+  .btn-new {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-new:hover { background: var(--accent-hover); }
+
+  .article-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .article-item {
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+  }
+  .article-item:hover { background: var(--surface2); }
+  .article-item.active {
+    background: var(--surface2);
+    border-color: var(--accent);
+  }
+  .article-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .article-item-meta {
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-published { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-draft { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .badge-featured { background: rgba(200,0,26,0.15); color: var(--accent); }
+
+  /* Editor */
+  .editor-area {
+    padding: 24px 32px;
+    overflow-y: auto;
+    max-width: 900px;
+  }
+  .editor-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text2);
+    font-size: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input-title {
+    font-size: 22px;
+    font-weight: 700;
+    padding: 14px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  textarea.form-input {
+    min-height: 400px;
+    resize: vertical;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  .form-hint {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* Cover image */
+  .cover-upload {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .cover-upload:hover { border-color: var(--accent); }
+  .cover-upload input { display: none; }
+  .cover-upload img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .cover-upload-text {
+    color: var(--text2);
+    font-size: 14px;
+  }
+
+  /* Checkboxes */
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .form-check input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+  }
+  .form-check label {
+    font-size: 14px;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+
+  /* Actions */
+  .editor-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: transparent; color: #f85149; border: 1px solid #f8514933; margin-left: auto; }
+  .btn-danger:hover { background: rgba(248,81,73,0.1); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--green);
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 200;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { max-height: 40vh; }
+    .editor-area { padding: 16px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">Inflex Admin</div>
+  <div class="topbar-links">
+    <a href="/">View Site</a>
+    <a href="/inflex-terminal.html">Terminal</a>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Articles</h2>
+      <button class="btn-new" onclick="newArticle()">+ New</button>
+    </div>
+    <div class="article-list" id="articleList">
+      <div style="padding:20px;color:var(--text2);text-align:center;font-size:14px;">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <div class="editor-area" id="editorArea">
+    <div class="editor-empty" id="editorEmpty">
+      Select an article or create a new one
+    </div>
+
+    <form id="editorForm" style="display:none" onsubmit="return saveArticle(event)">
+      <input type="hidden" id="articleId">
+
+      <div class="form-group">
+        <input type="text" id="articleTitle" class="form-input form-input-title" placeholder="Article title..." required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tag / Category</label>
+          <input type="text" id="articleTag" class="form-input" placeholder="e.g. DeFi · Analysis">
+        </div>
+        <div class="form-group">
+          <label>Author</label>
+          <input type="text" id="articleAuthor" class="form-input" placeholder="Inflex Research" value="Inflex Research">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Excerpt</label>
+        <input type="text" id="articleExcerpt" class="form-input" placeholder="Short summary shown on the homepage...">
+      </div>
+
+      <div class="form-group">
+        <label>Cover Image</label>
+        <div class="cover-upload" onclick="document.getElementById('coverInput').click()">
+          <img id="coverPreview" style="display:none">
+          <div class="cover-upload-text" id="coverText">Click to upload cover image (JPG, PNG, WebP — max 5MB)</div>
+          <input type="file" id="coverInput" accept="image/*" onchange="previewCover(this)">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Content</label>
+        <textarea id="articleContent" class="form-input" placeholder="Write your article here. HTML is supported for formatting.&#10;&#10;Use <h2>, <h3> for headings, <p> for paragraphs, <strong> for bold, <em> for italic, <ul>/<ol> for lists, <blockquote> for quotes, <code> for inline code, <pre> for code blocks." required></textarea>
+        <div class="form-hint">HTML tags supported: h2, h3, p, strong, em, a, ul, ol, li, blockquote, code, pre, img</div>
+      </div>
+
+      <div style="display:flex;gap:24px;">
+        <div class="form-check">
+          <input type="checkbox" id="articleFeatured">
+          <label for="articleFeatured">Featured article</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="articlePublished" checked>
+          <label for="articlePublished">Published</label>
+        </div>
+      </div>
+
+      <div class="editor-actions">
+        <button type="submit" class="btn btn-primary" id="saveBtn">Publish Article</button>
+        <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteBtn" onclick="deleteArticle()" style="display:none">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let articles = [];
+let currentId = null;
+
+// ── Load articles ──
+async function loadArticles() {
+  try {
+    const res = await fetch('/api/articles/all');
+    articles = await res.json();
+    renderList();
+  } catch (e) {
+    document.getElementById('articleList').innerHTML =
+      '<div style="padding:20px;color:#f85149;text-align:center;font-size:14px;">Failed to load articles</div>';
+  }
+}
+
+function renderList() {
+  const list = document.getElementById('articleList');
+  if (!articles.length) {
+    list.innerHTML = '<div style="padding:20px;color:var(--text2);text-align:center;font-size:14px;">No articles yet. Click "+ New" to create one.</div>';
+    return;
+  }
+  list.innerHTML = articles.map(a => `
+    <div class="article-item ${a.id === currentId ? 'active' : ''}" onclick="editArticle(${a.id})">
+      <div class="article-item-title">${escHtml(a.title)}</div>
+      <div class="article-item-meta">
+        <span>${formatDate(a.created_at)}</span>
+        ${a.is_featured ? '<span class="badge badge-featured">Featured</span>' : ''}
+        <span class="badge ${a.published ? 'badge-published' : 'badge-draft'}">${a.published ? 'Live' : 'Draft'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── New article ──
+function newArticle() {
+  currentId = null;
+  document.getElementById('editorEmpty').style.display = 'none';
+  document.getElementById('editorForm').style.display = 'block';
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('saveBtn').textContent = 'Publish Article';
+  document.getElementById('articleId').value = '';
+  document.getElementById('articleTitle').value = '';
+  document.getElementById('articleTag').value = '';
+  document.getElementById('articleAuthor').value = 'Inflex Research';
+  document.getElementById('articleExcerpt').value = '';
+  document.getElementById('articleContent').value = '';
+  document.getElementById('articleFeatured').checked = false;
+  document.getElementById('articlePublished').checked = true;
+  document.getElementById('coverPreview').style.display = 'none';
+  document.getElementById('coverText').style.display = 'block';
+  document.getElementById('coverInput').value = '';
+  renderList();
+}
+
+// ── Edit article ──
+function editArticle(id) {
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  currentId = id;
+
+  document.getElementById('editorEmpty').style.display = 'none';
+  document.getElementById('editorForm').style.display = 'block';
+  document.getElementById('deleteBtn').style.display = 'block';
+  document.getElementById('saveBtn').textContent = 'Update Article';
+  document.getElementById('articleId').value = a.id;
+  document.getElementById('articleTitle').value = a.title;
+  document.getElementById('articleTag').value = a.tag || '';
+  document.getElementById('articleAuthor').value = a.author || 'Inflex Research';
+  document.getElementById('articleExcerpt').value = a.excerpt || '';
+  document.getElementById('articleContent').value = a.content || '';
+  document.getElementById('articleFeatured').checked = !!a.is_featured;
+  document.getElementById('articlePublished').checked = a.published !== 0;
+
+  if (a.cover_image) {
+    document.getElementById('coverPreview').src = a.cover_image;
+    document.getElementById('coverPreview').style.display = 'block';
+    document.getElementById('coverText').style.display = 'none';
+  } else {
+    document.getElementById('coverPreview').style.display = 'none';
+    document.getElementById('coverText').style.display = 'block';
+  }
+  document.getElementById('coverInput').value = '';
+  renderList();
+}
+
+// ── Save article ──
+async function saveArticle(e) {
+  e.preventDefault();
+  const form = new FormData();
+  form.append('title', document.getElementById('articleTitle').value);
+  form.append('tag', document.getElementById('articleTag').value);
+  form.append('author', document.getElementById('articleAuthor').value);
+  form.append('excerpt', document.getElementById('articleExcerpt').value);
+  form.append('content', document.getElementById('articleContent').value);
+  form.append('is_featured', document.getElementById('articleFeatured').checked ? 'true' : 'false');
+  form.append('published', document.getElementById('articlePublished').checked ? 'true' : 'false');
+
+  const coverFile = document.getElementById('coverInput').files[0];
+  if (coverFile) form.append('cover_image', coverFile);
+
+  const id = document.getElementById('articleId').value;
+  const url = id ? `/api/articles/${id}` : '/api/articles';
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, { method, body: form });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to save');
+    }
+    const saved = await res.json();
+    currentId = saved.id;
+    showToast(id ? 'Article updated!' : 'Article published!');
+    await loadArticles();
+    editArticle(saved.id);
+  } catch (err) {
+    showToast(err.message, true);
+  }
+}
+
+// ── Delete article ──
+async function deleteArticle() {
+  const id = document.getElementById('articleId').value;
+  if (!id) return;
+  if (!confirm('Delete this article permanently?')) return;
+
+  try {
+    await fetch(`/api/articles/${id}`, { method: 'DELETE' });
+    currentId = null;
+    showToast('Article deleted');
+    cancelEdit();
+    await loadArticles();
+  } catch (err) {
+    showToast('Failed to delete', true);
+  }
+}
+
+// ── Cancel ──
+function cancelEdit() {
+  currentId = null;
+  document.getElementById('editorForm').style.display = 'none';
+  document.getElementById('editorEmpty').style.display = 'flex';
+  renderList();
+}
+
+// ── Cover preview ──
+function previewCover(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('coverPreview').src = e.target.result;
+      document.getElementById('coverPreview').style.display = 'block';
+      document.getElementById('coverText').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// ── Helpers ──
+function escHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+function formatDate(str) {
+  if (!str) return '';
+  const d = new Date(str + 'Z');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? '#f85149' : 'var(--green)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Init ──
+loadArticles();
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading... — Inflex Trades</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inflex.css">
+<style>
+  .article-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+  .article-page-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent, #c8001a);
+    margin-bottom: 16px;
+  }
+  .article-page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--ink, #1a1a18);
+    margin-bottom: 20px;
+  }
+  .article-page-meta {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 32px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .article-page-cover {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 32px;
+    max-height: 400px;
+    object-fit: cover;
+  }
+  .article-page-body {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #2a2a28;
+  }
+  .article-page-body h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 40px 0 16px;
+    color: var(--ink, #1a1a18);
+  }
+  .article-page-body h3 {
+    font-family: 'Barlow', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 32px 0 12px;
+    color: var(--ink, #1a1a18);
+  }
+  .article-page-body p {
+    margin-bottom: 18px;
+  }
+  .article-page-body blockquote {
+    border-left: 3px solid var(--accent, #c8001a);
+    padding: 12px 20px;
+    margin: 24px 0;
+    color: #555;
+    font-style: italic;
+    background: rgba(200,0,26,0.03);
+  }
+  .article-page-body pre {
+    background: #1a1a18;
+    color: #e6e6e6;
+    padding: 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 24px 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .article-page-body code {
+    background: rgba(0,0,0,0.06);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+  .article-page-body pre code {
+    background: none;
+    padding: 0;
+  }
+  .article-page-body img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 20px 0;
+  }
+  .article-page-body ul, .article-page-body ol {
+    margin: 16px 0;
+    padding-left: 24px;
+  }
+  .article-page-body li {
+    margin-bottom: 8px;
+  }
+  .article-page-body a {
+    color: var(--accent, #c8001a);
+    text-decoration: underline;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 32px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent, #c8001a);
+    text-decoration: none;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .article-not-found {
+    text-align: center;
+    padding: 80px 24px;
+    color: #888;
+    font-size: 18px;
+  }
+
+  @media (max-width: 600px) {
+    .article-page-title { font-size: 28px; }
+    .article-page { padding: 32px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV (simplified) -->
+<nav>
+  <div class="nav-inner">
+    <a href="/"><strong style="font-family:'Barlow Condensed',sans-serif;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:#1a1a18;text-decoration:none;">INFLEX TRADES</strong></a>
+    <ul class="nav-links">
+      <li><a href="/#insights">Insights</a></li>
+      <li><a href="/#about">About</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="article-page" id="articlePage">
+  <div style="text-align:center;padding:60px;color:#888;">Loading article...</div>
+</div>
+
+<script>
+async function loadArticle() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('slug');
+
+  if (!slug) {
+    document.getElementById('articlePage').innerHTML =
+      '<div class="article-not-found">No article specified. <a href="/">Go back home</a></div>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/articles/${encodeURIComponent(slug)}`);
+    if (!res.ok) throw new Error('Not found');
+    const a = await res.json();
+
+    document.title = `${a.title} — Inflex Trades`;
+
+    let html = '<a href="/" class="back-link">← Back to Inflex</a>';
+
+    if (a.tag) html += `<div class="article-page-tag">${escHtml(a.tag)}</div>`;
+    html += `<h1 class="article-page-title">${escHtml(a.title)}</h1>`;
+    html += `<div class="article-page-meta">
+      <span>${escHtml(a.author || 'Inflex Research')}</span>
+      <span>${a.read_time || ''}</span>
+      <span>${formatDate(a.created_at)}</span>
+    </div>`;
+
+    if (a.cover_image) {
+      html += `<img class="article-page-cover" src="${escAttr(a.cover_image)}" alt="">`;
+    }
+
+    html += `<div class="article-page-body">${a.content}</div>`;
+
+    document.getElementById('articlePage').innerHTML = html;
+  } catch (e) {
+    document.getElementById('articlePage').innerHTML =
+      '<div class="article-not-found">Article not found. <a href="/">Go back home</a></div>';
+  }
+}
+
+function escHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+function escAttr(text) {
+  return text.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatDate(str) {
+  if (!str) return '';
+  const d = new Date(str + 'Z');
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+loadArticle();
+</script>
+</body>
+</html>
