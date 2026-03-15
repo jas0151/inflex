@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/api/articles/all", "destination": "/api/articles/all" },
+    { "source": "/api/articles/upload-image", "destination": "/api/articles/upload-image" },
+    { "source": "/api/articles/:slug", "destination": "/api/articles/[slug]" },
+    { "source": "/api/articles", "destination": "/api/articles/index" }
+  ]
+}

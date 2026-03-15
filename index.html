@@ -84,101 +84,12 @@
     <span class="section-meta">March 2026</span>
   </div>
 
-  <!-- Featured -->
-  <div class="featured">
-    <div class="featured-visual">
-      <div class="chart-lines">
-        <svg viewBox="0 0 500 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Grid lines -->
-          <line x1="0" y1="80"  x2="500" y2="80"  stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="0" y1="160" x2="500" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="0" y1="240" x2="500" y2="240" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="100" y1="0" x2="100" y2="320" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="200" y1="0" x2="200" y2="320" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="300" y1="0" x2="300" y2="320" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <line x1="400" y1="0" x2="400" y2="320" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-          <!-- Chart line -->
-          <polyline points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60"
-            fill="none" stroke="rgba(200,0,26,0.6)" stroke-width="2"/>
-          <!-- Area fill -->
-          <polygon points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60 500,320 0,320"
-            fill="rgba(200,0,26,0.06)"/>
-          <!-- Second line -->
-          <polyline points="0,280 80,260 160,270 240,240 320,220 400,200 500,180"
-            fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4,4"/>
-        </svg>
-      </div>
-      <div class="featured-visual-tag">Featured Research</div>
-    </div>
-    <div class="featured-content">
-      <div>
-        <div class="featured-tag">Prediction Markets · Deep Dive</div>
-        <h3 class="featured-title">Prediction Markets in Crypto: The Complete 2026 Trading Guide</h3>
-        <p class="featured-excerpt">Billions of dollars now trade on the outcomes of elections, price movements, and world events — all on-chain. We break down every platform, every strategy, and exactly how to find your edge in a market that rewards information over instinct.</p>
-      </div>
-      <div class="article-meta">
-        <span class="article-byline">Inflex Research · 12 min read</span>
-        <a href="#" class="read-more">Read full piece →</a>
-      </div>
-    </div>
-  </div>
+  <!-- Featured (loaded dynamically from API) -->
+  <div class="featured" id="featuredArticle" style="display:none;"></div>
 
-  <!-- Article grid -->
-  <div class="article-grid">
-    <div class="article-card">
-      <div class="card-tag">DeFi · Analysis</div>
-      <div class="card-title">Angle Protocol Winds Down: What It Tells Us About the Stablecoin Wars</div>
-      <p class="card-excerpt">EURA and USDA are shutting down. The real story isn't the exit — it's what it reveals about the yield-bearing stablecoin thesis and who actually won.</p>
-      <div class="card-footer">
-        <span class="card-date">Mar 5, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Strategy · Arbitrage</div>
-      <div class="card-title">Cross-Platform Arbitrage: A Practical Playbook for 2026</div>
-      <p class="card-excerpt">The same event trades at different prices across Polymarket, Kalshi, and emerging BNB Chain platforms. Here's how to systematically capture that gap.</p>
-      <div class="card-footer">
-        <span class="card-date">Mar 3, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Markets · Macro</div>
-      <div class="card-title">BTC Dominance at 54%: What the Cycle Data Actually Says</div>
-      <p class="card-excerpt">Bitcoin's dominance is hovering at levels that historically precede altseason rotations. We look at what the on-chain data confirms — and what it doesn't.</p>
-      <div class="card-footer">
-        <span class="card-date">Mar 1, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">BNB Chain · Platforms</div>
-      <div class="card-title">Predict.fun, Opinion Labs & Probable: The BNB Prediction Market Trio</div>
-      <p class="card-excerpt">Three new platforms are quietly building prediction market infrastructure on BNB Chain. We profile each and what makes them different from Polymarket.</p>
-      <div class="card-footer">
-        <span class="card-date">Feb 27, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Liquidity · DeFi</div>
-      <div class="card-title">Providing Liquidity in Prediction Markets: The Honest Risk/Reward</div>
-      <p class="card-excerpt">AMM-based prediction markets offer 2–5% APY for liquidity providers. We model the real returns after impermanent loss, fees, and oracle risk.</p>
-      <div class="card-footer">
-        <span class="card-date">Feb 24, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
-    <div class="article-card">
-      <div class="card-tag">Macro · Fed</div>
-      <div class="card-title">The Fed, Rates, and Crypto: Reading the Polymarket Signal</div>
-      <p class="card-excerpt">Prediction market odds on Fed rate decisions have been a leading indicator — not a lagging one. Here's how to use them before the announcement.</p>
-      <div class="card-footer">
-        <span class="card-date">Feb 20, 2026</span>
-        <span class="card-arrow">→</span>
-      </div>
-    </div>
+  <!-- Article grid (loaded dynamically from API) -->
+  <div class="article-grid" id="articleGrid">
+    <div class="article-card"><p class="card-excerpt" style="text-align:center;padding:20px;color:#aaa;">Loading articles...</p></div>
   </div>
 </section>
 
@@ -533,10 +444,88 @@ function loadMoreProtocols() {
   renderProtocols();
 }
 
+// ── ARTICLES ──
+async function loadArticles() {
+  try {
+    const res = await fetch('/api/articles');
+    const articles = await res.json();
+    const featuredEl = document.getElementById('featuredArticle');
+    const grid = document.getElementById('articleGrid');
+
+    if (!articles.length) {
+      featuredEl.style.display = 'none';
+      grid.innerHTML = '<div class="article-card"><p class="card-excerpt" style="text-align:center;padding:20px;color:#aaa;">No articles published yet.</p></div>';
+      return;
+    }
+
+    // Find featured article (most recent one marked featured, or fallback to first)
+    const featured = articles.find(a => a.is_featured) || articles[0];
+    const rest = articles.filter(a => a.id !== featured.id).slice(0, 6);
+
+    // Render featured
+    const coverStyle = featured.cover_image
+      ? `background-image:url('${featured.cover_image}');background-size:cover;background-position:center;`
+      : '';
+    featuredEl.style.display = 'grid';
+    featuredEl.innerHTML = `
+      <a href="/article.html?slug=${encodeURIComponent(featured.slug)}" class="featured-visual" style="${coverStyle}text-decoration:none;">
+        <div class="chart-lines" ${coverStyle ? 'style="display:none"' : ''}>
+          <svg viewBox="0 0 500 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="0" y1="160" x2="500" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="0" y1="240" x2="500" y2="240" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <polyline points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60" fill="none" stroke="rgba(200,0,26,0.6)" stroke-width="2"/>
+            <polygon points="0,240 60,220 120,230 180,180 240,190 300,130 360,110 420,90 500,60 500,320 0,320" fill="rgba(200,0,26,0.06)"/>
+          </svg>
+        </div>
+        <div class="featured-visual-tag">Featured Research</div>
+      </a>
+      <a href="/article.html?slug=${encodeURIComponent(featured.slug)}" class="featured-content" style="text-decoration:none;color:inherit;">
+        <div>
+          <div class="featured-tag">${escHtmlSafe(featured.tag || 'Featured')}</div>
+          <h3 class="featured-title">${escHtmlSafe(featured.title)}</h3>
+          <p class="featured-excerpt">${escHtmlSafe(featured.excerpt || '')}</p>
+        </div>
+        <div class="article-meta">
+          <span class="article-byline">${escHtmlSafe(featured.author || 'Inflex Research')} · ${escHtmlSafe(featured.read_time || '')}</span>
+          <span class="read-more">Read full piece →</span>
+        </div>
+      </a>`;
+
+    // Render grid
+    if (!rest.length) {
+      grid.innerHTML = '';
+      return;
+    }
+    grid.innerHTML = rest.map(a => `
+      <a href="/article.html?slug=${encodeURIComponent(a.slug)}" class="article-card" style="text-decoration:none;color:inherit;">
+        ${a.cover_image ? `<img src="${escAttrSafe(a.cover_image)}" style="width:100%;height:140px;object-fit:cover;border-radius:4px;margin-bottom:14px;" alt="">` : ''}
+        <div class="card-tag">${escHtmlSafe(a.tag || 'Article')}</div>
+        <div class="card-title">${escHtmlSafe(a.title)}</div>
+        <p class="card-excerpt">${escHtmlSafe(a.excerpt || '')}</p>
+        <div class="card-footer">
+          <span class="card-date">${fmtArticleDate(a.created_at)}</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    `).join('');
+  } catch (e) {
+    // Silently fail — keep loading message or show fallback
+  }
+}
+function escHtmlSafe(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function escAttrSafe(t) { return t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtArticleDate(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 // ── INIT ALL ──
 loadMarketData();
 loadBTCEMA();
 loadDefiProtocols();
+loadArticles();
 setInterval(loadMarketData, 120000); // refresh every 2 min
 setInterval(loadBTCEMA, 300000);    // EMA every 5 min</script>
 </body>
