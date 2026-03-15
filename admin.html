@@ -263,8 +263,8 @@
   /* ── Toolbar ── */
   .toolbar {
     display: flex;
-    gap: 2px;
-    padding: 6px 8px;
+    gap: 1px;
+    padding: 5px 8px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-bottom: none;
@@ -276,7 +276,7 @@
     width: 1px;
     height: 20px;
     background: var(--border);
-    margin: 0 4px;
+    margin: 0 5px;
   }
   .tb {
     background: none;
@@ -284,7 +284,7 @@
     color: var(--text2);
     font-size: 13px;
     font-weight: 600;
-    padding: 4px 8px;
+    padding: 5px 9px;
     border-radius: 3px;
     cursor: pointer;
     font-family: inherit;
@@ -292,78 +292,143 @@
     transition: all 0.1s;
   }
   .tb:hover { color: var(--text); background: var(--surface2); }
+  .tb.active { color: var(--accent); background: var(--surface2); }
   .tb-bold { font-weight: 800; }
   .tb-italic { font-style: italic; }
 
-  /* ── Content editor ── */
-  .content-wrap {
+  /* ── WYSIWYG editor ── */
+  .editor-content {
+    min-height: 420px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 24px;
+    background: #faf8f4;
+    border: 1px solid var(--border);
+    border-radius: 0 0 5px 5px;
+    color: #292929;
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    outline: none;
+    cursor: text;
+  }
+  .editor-content:focus {
+    border-color: var(--accent);
+  }
+  .editor-content:empty::before {
+    content: attr(data-placeholder);
+    color: #b5b0a8;
+    pointer-events: none;
+  }
+  .editor-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 32px 0 12px;
+    color: #1a1a18;
+    line-height: 1.25;
+  }
+  .editor-content h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 28px 0 10px;
+    color: #1a1a18;
+  }
+  .editor-content p {
+    margin-bottom: 16px;
+  }
+  .editor-content strong { font-weight: 700; }
+  .editor-content blockquote {
+    border-left: 3px solid #c8001a;
+    padding: 8px 18px;
+    margin: 20px 0;
+    color: #555;
+    font-style: italic;
+    background: rgba(200,0,26,0.04);
+  }
+  .editor-content pre {
+    background: #1a1a18;
+    color: #e6e6e6;
+    padding: 18px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: monospace;
+  }
+  .editor-content code {
+    background: rgba(0,0,0,0.06);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-family: monospace;
+  }
+  .editor-content pre code {
+    background: none;
+    padding: 0;
+  }
+  .editor-content ul, .editor-content ol {
+    margin: 14px 0;
+    padding-left: 24px;
+  }
+  .editor-content li { margin-bottom: 6px; }
+  .editor-content a { color: #c8001a; text-decoration: underline; }
+  .editor-content img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 20px 0;
+    display: block;
+    cursor: default;
+  }
+  .editor-content figure {
+    margin: 24px 0;
     position: relative;
   }
-  textarea.form-input.content-textarea {
-    min-height: 360px;
-    resize: vertical;
-    line-height: 1.7;
-    font-size: 14px;
-    border-radius: 0 0 5px 5px;
-    font-family: 'Barlow', monospace;
+  .editor-content figure img {
+    margin: 0;
+    width: 100%;
   }
+  .editor-content figcaption {
+    font-size: 13px;
+    color: #999;
+    text-align: center;
+    margin-top: 8px;
+    font-style: italic;
+    outline: none;
+  }
+  .editor-content figcaption:empty::before {
+    content: 'Add a caption...';
+    color: #ccc;
+  }
+  .editor-content hr {
+    border: none;
+    height: 1px;
+    background: #ddd;
+    margin: 32px 0;
+  }
+
+  /* Image hover controls */
+  .editor-content figure:hover .img-remove,
+  .editor-content img:hover + .img-remove,
+  .editor-content .img-remove:hover {
+    opacity: 1;
+  }
+
   .content-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 4px;
+    margin-top: 6px;
   }
   .word-count {
     font-size: 11px;
     color: var(--text2);
   }
-  .tab-btns {
-    display: flex;
-    gap: 2px;
-  }
-  .tab-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text2);
+  .content-hint {
     font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.1s;
+    color: var(--text2);
   }
-  .tab-btn:first-child { border-radius: 3px 0 0 3px; }
-  .tab-btn:last-child { border-radius: 0 3px 3px 0; }
-  .tab-btn.active { color: var(--text); background: var(--surface2); }
-
-  /* ── Preview ── */
-  .preview-pane {
-    display: none;
-    min-height: 360px;
-    padding: 24px;
-    background: #faf8f4;
-    border: 1px solid var(--border);
-    border-radius: 0 0 5px 5px;
-    color: #2a2a28;
-    font-size: 15px;
-    line-height: 1.75;
-    overflow-y: auto;
-  }
-  .preview-pane h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin: 28px 0 12px; color: #1a1a18; }
-  .preview-pane h3 { font-size: 18px; font-weight: 700; margin: 24px 0 10px; color: #1a1a18; }
-  .preview-pane p { margin-bottom: 14px; }
-  .preview-pane strong { font-weight: 700; }
-  .preview-pane blockquote { border-left: 3px solid #c8001a; padding: 10px 16px; margin: 16px 0; color: #555; font-style: italic; background: rgba(200,0,26,0.04); }
-  .preview-pane pre { background: #1a1a18; color: #e6e6e6; padding: 16px; border-radius: 5px; overflow-x: auto; margin: 16px 0; font-size: 13px; }
-  .preview-pane code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
-  .preview-pane pre code { background: none; padding: 0; }
-  .preview-pane ul, .preview-pane ol { margin: 12px 0; padding-left: 22px; }
-  .preview-pane li { margin-bottom: 6px; }
-  .preview-pane a { color: #c8001a; }
-  .preview-pane img { max-width: 100%; border-radius: 5px; margin: 14px 0; display: block; }
-  .preview-pane figure { margin: 20px 0; }
-  .preview-pane figure img { margin-bottom: 6px; }
-  .preview-pane figcaption { font-size: 13px; color: #888; text-align: center; font-style: italic; }
 
   /* ── Cover image ── */
   .cover-upload {
@@ -557,37 +622,31 @@
           </div>
 
           <div class="form-group">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-              <label style="margin-bottom:0;">Content</label>
-              <div class="tab-btns">
-                <button type="button" class="tab-btn active" onclick="setTab('write',this)">Write</button>
-                <button type="button" class="tab-btn" onclick="setTab('preview',this)">Preview</button>
-              </div>
-            </div>
+            <label>Content</label>
             <!-- Formatting toolbar -->
             <div class="toolbar" id="toolbar">
-              <button type="button" class="tb tb-bold" onclick="insertTag('strong')" title="Bold">B</button>
-              <button type="button" class="tb tb-italic" onclick="insertTag('em')" title="Italic">I</button>
+              <button type="button" class="tb tb-bold" onmousedown="execFmt(event,'bold')" title="Bold (Ctrl+B)">B</button>
+              <button type="button" class="tb tb-italic" onmousedown="execFmt(event,'italic')" title="Italic (Ctrl+I)">I</button>
+              <button type="button" class="tb" onmousedown="execFmt(event,'underline')" title="Underline (Ctrl+U)" style="text-decoration:underline;">U</button>
               <div class="toolbar-sep"></div>
-              <button type="button" class="tb" onclick="insertTag('h2')" title="Heading 2">H2</button>
-              <button type="button" class="tb" onclick="insertTag('h3')" title="Heading 3">H3</button>
+              <button type="button" class="tb" onmousedown="execBlock(event,'h2')" title="Heading 2">H2</button>
+              <button type="button" class="tb" onmousedown="execBlock(event,'h3')" title="Heading 3">H3</button>
+              <button type="button" class="tb" onmousedown="execBlock(event,'p')" title="Paragraph">P</button>
               <div class="toolbar-sep"></div>
-              <button type="button" class="tb" onclick="insertTag('p')" title="Paragraph">¶</button>
-              <button type="button" class="tb" onclick="insertTag('blockquote')" title="Quote">❝</button>
-              <button type="button" class="tb" onclick="insertTag('code')" title="Inline code">&lt;/&gt;</button>
-              <button type="button" class="tb" onclick="insertBlock('pre')" title="Code block">Pre</button>
+              <button type="button" class="tb" onmousedown="execFmt(event,'insertUnorderedList')" title="Bullet list">&#8226; List</button>
+              <button type="button" class="tb" onmousedown="execFmt(event,'insertOrderedList')" title="Numbered list">1. List</button>
+              <button type="button" class="tb" onmousedown="execBlock(event,'blockquote')" title="Quote">&#10077;</button>
               <div class="toolbar-sep"></div>
-              <button type="button" class="tb" onclick="insertList('ul')" title="Bullet list">• List</button>
-              <button type="button" class="tb" onclick="insertList('ol')" title="Numbered list">1. List</button>
-              <div class="toolbar-sep"></div>
-              <button type="button" class="tb" onclick="insertLink()" title="Link">Link</button>
-              <button type="button" class="tb" onclick="insertImage()" title="Upload image into content">Img</button>
-              <input type="file" id="contentImageInput" accept="image/*" style="display:none" onchange="handleContentImage(this)">
+              <button type="button" class="tb" onmousedown="execLink(event)" title="Insert link">Link</button>
+              <button type="button" class="tb" onmousedown="execInsertImage(event)" title="Upload image">&#128247; Image</button>
+              <button type="button" class="tb" onmousedown="execHR(event)" title="Horizontal rule">&#8212;</button>
+              <input type="file" id="contentImageInput" accept="image/*" style="display:none" multiple>
             </div>
-            <textarea id="articleContent" class="form-input content-textarea" placeholder="Write your article content here using HTML tags for formatting..." required></textarea>
-            <div class="preview-pane" id="previewPane"></div>
+            <!-- WYSIWYG contenteditable editor -->
+            <div class="editor-content" id="articleContent" contenteditable="true" data-placeholder="Start writing your article... &#10;&#10;Just type naturally. Use the toolbar or keyboard shortcuts (Ctrl+B for bold, Ctrl+I for italic). Drag & drop or paste images directly."></div>
             <div class="content-footer">
               <div class="word-count" id="wordCount">0 words · 0 min read</div>
+              <div class="content-hint">Paste or drop images anywhere · Ctrl+B bold · Ctrl+I italic</div>
             </div>
           </div>
 
@@ -693,11 +752,10 @@ function newArticle() {
   document.getElementById('articleTag').value = '';
   document.getElementById('articleAuthor').value = 'Inflex Research';
   document.getElementById('articleExcerpt').value = '';
-  document.getElementById('articleContent').value = '';
+  document.getElementById('articleContent').innerHTML = '';
   document.getElementById('articleFeatured').checked = false;
   document.getElementById('articlePublished').checked = true;
   clearCover();
-  setTab('write', document.querySelector('.tab-btn'));
   updateWordCount();
   renderList();
   document.getElementById('articleTitle').focus();
@@ -719,7 +777,7 @@ function editArticle(id) {
   document.getElementById('articleTag').value = a.tag || '';
   document.getElementById('articleAuthor').value = a.author || 'Inflex Research';
   document.getElementById('articleExcerpt').value = a.excerpt || '';
-  document.getElementById('articleContent').value = a.content || '';
+  document.getElementById('articleContent').innerHTML = a.content || '';
   document.getElementById('articleFeatured').checked = !!a.is_featured;
   document.getElementById('articlePublished').checked = a.published !== false;
 
@@ -732,7 +790,6 @@ function editArticle(id) {
     clearCover();
   }
   document.getElementById('coverInput').value = '';
-  setTab('write', document.querySelector('.tab-btn'));
   updateWordCount();
   renderList();
 }
@@ -749,12 +806,21 @@ async function saveArticle(e) {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
+  const contentHtml = getEditorContent();
+  if (!contentHtml || !editor.innerText.trim()) {
+    showToast('Please add some content to your article', true);
+    btn.disabled = false;
+    btn.textContent = currentId ? 'Save Changes' : 'Publish Article';
+    editor.focus();
+    return;
+  }
+
   const body = {
     title: document.getElementById('articleTitle').value,
     tag: document.getElementById('articleTag').value,
     author: document.getElementById('articleAuthor').value,
     excerpt: document.getElementById('articleExcerpt').value,
-    content: document.getElementById('articleContent').value,
+    content: contentHtml,
     is_featured: document.getElementById('articleFeatured').checked,
     published: document.getElementById('articlePublished').checked
   };
@@ -857,113 +923,163 @@ function clearCover() {
   document.getElementById('coverRemove').style.display = 'none';
 }
 
-// ── Formatting toolbar ──
-function insertTag(tag) {
-  const ta = document.getElementById('articleContent');
-  const start = ta.selectionStart;
-  const end = ta.selectionEnd;
-  const selected = ta.value.substring(start, end);
-  const text = selected || 'text';
-  const insert = `<${tag}>${text}</${tag}>`;
-  ta.setRangeText(insert, start, end, 'select');
-  ta.focus();
+// ── WYSIWYG Editor ──
+const editor = document.getElementById('articleContent');
+
+function execFmt(e, cmd) {
+  e.preventDefault();
+  editor.focus();
+  document.execCommand(cmd, false, null);
   updateWordCount();
 }
 
-function insertBlock(tag) {
-  const ta = document.getElementById('articleContent');
-  const start = ta.selectionStart;
-  const selected = ta.value.substring(ta.selectionStart, ta.selectionEnd);
-  const text = selected || 'code here';
-  const insert = `\n<${tag}><code>${text}</code></${tag}>\n`;
-  ta.setRangeText(insert, start, ta.selectionEnd, 'end');
-  ta.focus();
+function execBlock(e, tag) {
+  e.preventDefault();
+  editor.focus();
+  document.execCommand('formatBlock', false, `<${tag}>`);
   updateWordCount();
 }
 
-function insertList(tag) {
-  const ta = document.getElementById('articleContent');
-  const start = ta.selectionStart;
-  const insert = `\n<${tag}>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</${tag}>\n`;
-  ta.setRangeText(insert, start, ta.selectionEnd, 'end');
-  ta.focus();
-  updateWordCount();
-}
-
-function insertLink() {
+function execLink(e) {
+  e.preventDefault();
   const url = prompt('Enter URL:');
   if (!url) return;
-  const ta = document.getElementById('articleContent');
-  const start = ta.selectionStart;
-  const selected = ta.value.substring(ta.selectionStart, ta.selectionEnd);
-  const text = selected || 'link text';
-  const insert = `<a href="${url}">${text}</a>`;
-  ta.setRangeText(insert, start, ta.selectionEnd, 'select');
-  ta.focus();
+  editor.focus();
+  document.execCommand('createLink', false, url);
 }
 
-function insertImage() {
-  // Open file picker — the file input's onchange calls handleContentImage
+function execHR(e) {
+  e.preventDefault();
+  editor.focus();
+  document.execCommand('insertHorizontalRule', false, null);
+  updateWordCount();
+}
+
+function execInsertImage(e) {
+  e.preventDefault();
   document.getElementById('contentImageInput').click();
 }
 
-function handleContentImage(input) {
-  if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
-  if (file.size > 5 * 1024 * 1024) {
-    showToast('Image too large (max 5MB)', true);
-    input.value = '';
-    return;
+// Handle file input for images
+document.getElementById('contentImageInput').addEventListener('change', function() {
+  const files = this.files;
+  if (!files.length) return;
+  for (const file of files) {
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image too large (max 5MB): ' + file.name, true);
+      continue;
+    }
+    insertImageFile(file);
   }
+  this.value = '';
+});
+
+function insertImageFile(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
-    const base64 = e.target.result;
-    const caption = prompt('Image caption (optional):') || '';
-    const ta = document.getElementById('articleContent');
-    const pos = ta.selectionStart;
-    let insert;
-    if (caption) {
-      insert = `\n<figure>\n  <img src="${base64}" alt="${caption.replace(/"/g, '&quot;')}">\n  <figcaption>${caption}</figcaption>\n</figure>\n`;
+    editor.focus();
+    // Create a figure with editable caption
+    const figure = document.createElement('figure');
+    const img = document.createElement('img');
+    img.src = e.target.result;
+    img.alt = '';
+    const caption = document.createElement('figcaption');
+    caption.contentEditable = 'true';
+    caption.setAttribute('data-placeholder', 'Add a caption...');
+    figure.appendChild(img);
+    figure.appendChild(caption);
+
+    // Insert at cursor position
+    const sel = window.getSelection();
+    if (sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(figure);
+      // Move cursor after the figure
+      range.setStartAfter(figure);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
     } else {
-      insert = `\n<img src="${base64}" alt="">\n`;
+      editor.appendChild(figure);
     }
-    ta.setRangeText(insert, pos, ta.selectionEnd, 'end');
-    ta.focus();
+
+    // Add a paragraph after figure if it's the last element
+    if (!figure.nextElementSibling) {
+      const p = document.createElement('p');
+      p.innerHTML = '<br>';
+      figure.after(p);
+    }
+
     updateWordCount();
   };
   reader.readAsDataURL(file);
-  input.value = '';
 }
 
-// ── Tabs (Write / Preview) ──
-function setTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+// ── Paste images from clipboard ──
+editor.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
 
-  const ta = document.getElementById('articleContent');
-  const preview = document.getElementById('previewPane');
-  const toolbar = document.getElementById('toolbar');
-
-  if (tab === 'write') {
-    ta.style.display = 'block';
-    preview.style.display = 'none';
-    toolbar.style.display = 'flex';
-  } else {
-    ta.style.display = 'none';
-    preview.style.display = 'block';
-    toolbar.style.display = 'none';
-    preview.innerHTML = ta.value || '<span style="color:#aaa;">Nothing to preview</span>';
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) insertImageFile(file);
+      return;
+    }
   }
-}
+  // For text paste: let it through but clean up after
+  setTimeout(() => {
+    // Strip unwanted attributes from pasted HTML but keep formatting
+    editor.querySelectorAll('[style]').forEach(el => {
+      if (el.tagName !== 'IMG' && el.tagName !== 'FIGURE') {
+        el.removeAttribute('style');
+      }
+    });
+    updateWordCount();
+  }, 0);
+});
+
+// ── Drag & drop images into editor ──
+editor.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  editor.style.borderColor = 'var(--accent)';
+});
+editor.addEventListener('dragleave', () => {
+  editor.style.borderColor = '';
+});
+editor.addEventListener('drop', (e) => {
+  e.preventDefault();
+  editor.style.borderColor = '';
+  const files = e.dataTransfer?.files;
+  if (!files) return;
+
+  for (const file of files) {
+    if (file.type.startsWith('image/')) {
+      // Place cursor at drop position
+      const range = document.caretRangeFromPoint
+        ? document.caretRangeFromPoint(e.clientX, e.clientY)
+        : null;
+      if (range) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      insertImageFile(file);
+    }
+  }
+});
 
 // ── Word count ──
 function updateWordCount() {
-  const content = document.getElementById('articleContent').value;
-  const text = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  const words = text ? text.split(' ').length : 0;
+  const text = editor.innerText.trim();
+  const words = text ? text.split(/\s+/).length : 0;
   const mins = Math.ceil(words / 200);
   document.getElementById('wordCount').textContent = `${words} words · ${mins} min read`;
 }
+
+editor.addEventListener('input', updateWordCount);
 
 // ── Helpers ──
 function escHtml(text) {
@@ -1000,8 +1116,19 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ── Content change listener ──
-document.getElementById('articleContent').addEventListener('input', updateWordCount);
+// ── Get cleaned editor HTML ──
+function getEditorContent() {
+  const clone = editor.cloneNode(true);
+  // Remove any contenteditable attributes from figcaptions
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  // Remove empty figcaptions
+  clone.querySelectorAll('figcaption').forEach(fc => {
+    if (!fc.textContent.trim()) fc.remove();
+  });
+  // Remove data-placeholder attributes
+  clone.querySelectorAll('[data-placeholder]').forEach(el => el.removeAttribute('data-placeholder'));
+  return clone.innerHTML.trim();
+}
 
 // ── Drag & drop cover image ──
 const coverArea = document.getElementById('coverArea');
