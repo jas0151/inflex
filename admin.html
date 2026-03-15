@@ -423,6 +423,7 @@ function renderList() {
 // ── New article ──
 function newArticle() {
   currentId = null;
+  pendingCoverBase64 = null;
   document.getElementById('editorEmpty').style.display = 'none';
   document.getElementById('editorForm').style.display = 'block';
   document.getElementById('deleteBtn').style.display = 'none';
@@ -446,6 +447,7 @@ function editArticle(id) {
   const a = articles.find(x => x.id === id);
   if (!a) return;
   currentId = id;
+  pendingCoverBase64 = null;
 
   document.getElementById('editorEmpty').style.display = 'none';
   document.getElementById('editorForm').style.display = 'block';
@@ -473,26 +475,34 @@ function editArticle(id) {
 }
 
 // ── Save article ──
+let pendingCoverBase64 = null;
+
 async function saveArticle(e) {
   e.preventDefault();
-  const form = new FormData();
-  form.append('title', document.getElementById('articleTitle').value);
-  form.append('tag', document.getElementById('articleTag').value);
-  form.append('author', document.getElementById('articleAuthor').value);
-  form.append('excerpt', document.getElementById('articleExcerpt').value);
-  form.append('content', document.getElementById('articleContent').value);
-  form.append('is_featured', document.getElementById('articleFeatured').checked ? 'true' : 'false');
-  form.append('published', document.getElementById('articlePublished').checked ? 'true' : 'false');
+  const body = {
+    title: document.getElementById('articleTitle').value,
+    tag: document.getElementById('articleTag').value,
+    author: document.getElementById('articleAuthor').value,
+    excerpt: document.getElementById('articleExcerpt').value,
+    content: document.getElementById('articleContent').value,
+    is_featured: document.getElementById('articleFeatured').checked,
+    published: document.getElementById('articlePublished').checked
+  };
 
-  const coverFile = document.getElementById('coverInput').files[0];
-  if (coverFile) form.append('cover_image', coverFile);
+  if (pendingCoverBase64) {
+    body.cover_image = pendingCoverBase64;
+  }
 
   const id = document.getElementById('articleId').value;
   const url = id ? `/api/articles/${id}` : '/api/articles';
   const method = id ? 'PUT' : 'POST';
 
   try {
-    const res = await fetch(url, { method, body: form });
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.error || 'Failed to save');
@@ -537,6 +547,7 @@ function previewCover(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = (e) => {
+      pendingCoverBase64 = e.target.result;
       document.getElementById('coverPreview').src = e.target.result;
       document.getElementById('coverPreview').style.display = 'block';
       document.getElementById('coverText').style.display = 'none';
