@@ -131,6 +131,20 @@
   </div>
 </section>
 
+<!-- NEWS SUGGESTIONS -->
+<div class="suggestions-section" id="suggestions">
+  <div class="suggestions-header">
+    <h2 class="suggestions-title">Suggested For You</h2>
+    <div class="suggestions-tabs">
+      <button class="suggestion-tab active" onclick="switchSuggestionTab('latest', this)">Latest</button>
+      <button class="suggestion-tab" onclick="switchSuggestionTab('hottest', this)">Most Read</button>
+    </div>
+  </div>
+  <div class="suggestions-grid" id="suggestionsGrid">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
 <!-- MARKET DATA PANEL -->
 <!-- DEFI PROTOCOLS -->
 <div class="defi-section" id="defi">
@@ -218,6 +232,31 @@
   </ul>
   <div class="footer-note">© 2026 Inflex Trades. All rights reserved.</div>
 </footer>
+
+<!-- ARTICLE POP-OUT MODAL -->
+<div class="article-modal-overlay" id="articleModal" onclick="closeArticleModal(event)">
+  <div class="modal-body" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeArticleModal()" title="Close">&times;</button>
+    <div id="modalCoverWrap"></div>
+    <div class="modal-content">
+      <div class="modal-tag" id="modalTag"></div>
+      <h3 class="modal-title" id="modalTitle"></h3>
+      <p class="modal-excerpt" id="modalExcerpt"></p>
+      <div class="modal-meta">
+        <span id="modalAuthor"></span>
+        <span>·</span>
+        <span id="modalDate"></span>
+        <span>·</span>
+        <span id="modalReadTime"></span>
+        <span class="views-badge">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="modalViews"></span>
+        </span>
+      </div>
+      <a class="modal-read-btn" id="modalReadLink" href="#">Read Full Article →</a>
+    </div>
+  </div>
+</div>
 
 <script>
 const TICKER_COINS = [
@@ -514,6 +553,7 @@ async function loadArticles() {
     }
 
     renderArticles(allLoadedArticles);
+    renderSuggestions();
   } catch (e) {
     const skelFeatured = document.getElementById('featuredSkeleton');
     const skelGrid = document.getElementById('articleSkeleton');
@@ -577,7 +617,7 @@ function renderArticles(articles) {
     return;
   }
   grid.innerHTML = displayRest.map((a, i) => `
-    <a href="/article.html?slug=${encodeURIComponent(a.slug)}" class="article-card reveal reveal-delay-${(i % 3) + 1}" style="text-decoration:none;color:inherit;">
+    <div class="article-card reveal reveal-delay-${(i % 3) + 1}" style="cursor:pointer;" onclick="openArticleModal('${escAttrSafe(a.slug)}')">
       <div class="card-img-wrap">
         ${a.cover_image
           ? `<img src="${escAttrSafe(a.cover_image)}" alt="" loading="lazy">`
@@ -593,7 +633,7 @@ function renderArticles(articles) {
           <span class="card-arrow">&#8594;</span>
         </div>
       </div>
-    </a>
+    </div>
   `).join('');
 
   // Load more button
@@ -661,6 +701,87 @@ function initRevealObserver() {
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   els.forEach(el => obs.observe(el));
+}
+
+// ── ARTICLE POP-OUT MODAL ──
+function openArticleModal(slug) {
+  const article = allLoadedArticles.find(a => a.slug === slug);
+  if (!article) {
+    window.location.href = '/article.html?slug=' + encodeURIComponent(slug);
+    return;
+  }
+
+  const modal = document.getElementById('articleModal');
+  const coverWrap = document.getElementById('modalCoverWrap');
+
+  if (article.cover_image) {
+    coverWrap.innerHTML = `<img class="modal-cover" src="${escAttrSafe(article.cover_image)}" alt="">`;
+  } else {
+    coverWrap.innerHTML = `<div class="modal-cover-placeholder"></div>`;
+  }
+
+  document.getElementById('modalTag').textContent = article.tag || 'Article';
+  document.getElementById('modalTitle').textContent = article.title;
+  document.getElementById('modalExcerpt').textContent = article.excerpt || '';
+  document.getElementById('modalAuthor').textContent = article.author || 'Inflex Research';
+  document.getElementById('modalDate').textContent = fmtArticleDate(article.created_at);
+  document.getElementById('modalReadTime').textContent = article.read_time || '';
+  document.getElementById('modalViews').textContent = (article.views || 0).toLocaleString();
+  document.getElementById('modalReadLink').href = '/article.html?slug=' + encodeURIComponent(article.slug);
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticleModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const modal = document.getElementById('articleModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeArticleModal();
+});
+
+// ── NEWS SUGGESTIONS ──
+let currentSuggestionTab = 'latest';
+
+function switchSuggestionTab(tab, btn) {
+  currentSuggestionTab = tab;
+  document.querySelectorAll('.suggestion-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSuggestions();
+}
+
+function renderSuggestions() {
+  const grid = document.getElementById('suggestionsGrid');
+  if (!allLoadedArticles.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-family:\'Barlow\',sans-serif;">No articles available yet.</div>';
+    return;
+  }
+
+  let sorted;
+  if (currentSuggestionTab === 'hottest') {
+    sorted = [...allLoadedArticles].sort((a, b) => (b.views || 0) - (a.views || 0));
+  } else {
+    sorted = [...allLoadedArticles].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+
+  const top4 = sorted.slice(0, 4);
+
+  grid.innerHTML = top4.map((a, i) => `
+    <div class="suggestion-card" onclick="openArticleModal('${escAttrSafe(a.slug)}')">
+      <span class="suggestion-rank">${i + 1}</span>
+      <div class="suggestion-card-tag">${escHtmlSafe(a.tag || 'Article')}</div>
+      <div class="suggestion-card-title">${escHtmlSafe(a.title)}</div>
+      <div class="suggestion-card-meta">
+        <span>${fmtArticleDate(a.created_at)}</span>
+        <span>${escHtmlSafe(a.read_time || '')}</span>
+        ${currentSuggestionTab === 'hottest' ? `<span class="hot-badge">&#128293; ${(a.views || 0).toLocaleString()} views</span>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
 // ── INIT ALL ──
