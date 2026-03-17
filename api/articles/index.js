@@ -1,4 +1,5 @@
 const { getSql, initDb, slugify, estimateReadTime, withErrorHandling } = require('../_db');
+const { requireAuth } = require('../_auth');
 
 module.exports = withErrorHandling(async function handler(req, res) {
   await initDb();
@@ -10,7 +11,7 @@ module.exports = withErrorHandling(async function handler(req, res) {
     if (search) {
       const q = `%${search}%`;
       rows = await sql`
-        SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, created_at
+        SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, views, created_at
         FROM articles
         WHERE published = TRUE AND (scheduled_at IS NULL OR scheduled_at <= NOW())
           AND (title ILIKE ${q} OR tag ILIKE ${q} OR excerpt ILIKE ${q})
@@ -18,7 +19,7 @@ module.exports = withErrorHandling(async function handler(req, res) {
       `;
     } else {
       rows = await sql`
-        SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, created_at
+        SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, views, created_at
         FROM articles
         WHERE published = TRUE AND (scheduled_at IS NULL OR scheduled_at <= NOW())
         ORDER BY created_at DESC
@@ -28,6 +29,8 @@ module.exports = withErrorHandling(async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
+    const user = await requireAuth(req, res);
+    if (!user) return;
     const { title, tag, excerpt, content, author, is_featured, cover_image } = req.body;
 
     if (!title || !content) {

@@ -1,4 +1,5 @@
 const { getSql, initDb, withErrorHandling } = require('../_db');
+const { requireAuth } = require('../_auth');
 
 module.exports = withErrorHandling(async function handler(req, res) {
   await initDb();
@@ -8,6 +9,9 @@ module.exports = withErrorHandling(async function handler(req, res) {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const user = await requireAuth(req, res);
+  if (!user) return;
 
   const { action, ids } = req.body;
   if (!action || !ids || !ids.length) {

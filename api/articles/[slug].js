@@ -1,4 +1,5 @@
 const { getSql, initDb, estimateReadTime, withErrorHandling } = require('../_db');
+const { requireAuth } = require('../_auth');
 
 module.exports = withErrorHandling(async function handler(req, res) {
   await initDb();
@@ -33,6 +34,8 @@ module.exports = withErrorHandling(async function handler(req, res) {
   }
 
   if (req.method === 'PUT') {
+    const user = await requireAuth(req, res);
+    if (!user) return;
     const id = parseInt(slug);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid article ID' });
 
@@ -66,6 +69,8 @@ module.exports = withErrorHandling(async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
+    const user = await requireAuth(req, res);
+    if (!user) return;
     const id = parseInt(slug);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid article ID' });
 

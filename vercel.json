@@ -1,6 +1,17 @@
 {
   "rewrites": [
+    { "source": "/api/auth/login", "destination": "/api/auth/login" },
+    { "source": "/api/auth/logout", "destination": "/api/auth/logout" },
+    { "source": "/api/auth/me", "destination": "/api/auth/me" },
+    { "source": "/api/auth/setup", "destination": "/api/auth/setup" },
+    { "source": "/api/auth/check-setup", "destination": "/api/auth/check-setup" },
+    { "source": "/api/auth/change-password", "destination": "/api/auth/change-password" },
+    { "source": "/api/subscribers/:action", "destination": "/api/subscribers/[action]" },
+    { "source": "/api/subscribers", "destination": "/api/subscribers/index" },
     { "source": "/api/articles/all", "destination": "/api/articles/all" },
+    { "source": "/api/articles/stats", "destination": "/api/articles/stats" },
+    { "source": "/api/articles/bulk", "destination": "/api/articles/bulk" },
+    { "source": "/api/articles/duplicate", "destination": "/api/articles/duplicate" },
     { "source": "/api/articles/upload-image", "destination": "/api/articles/upload-image" },
     { "source": "/api/articles/:slug", "destination": "/api/articles/[slug]" },
     { "source": "/api/articles", "destination": "/api/articles/index" }

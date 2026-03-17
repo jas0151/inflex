@@ -49,6 +49,48 @@ function getDb() {
     if (!cols.includes('meta_description')) {
       db.exec("ALTER TABLE articles ADD COLUMN meta_description TEXT DEFAULT ''");
     }
+
+    // Admin users table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS admin_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+    `);
+
+    // Admin sessions table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS admin_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        token TEXT NOT NULL UNIQUE,
+        user_id INTEGER NOT NULL,
+        expires_at TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+      );
+    `);
+
+    // Subscribers table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS subscribers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        name TEXT DEFAULT '',
+        is_active INTEGER DEFAULT 1,
+        subscribed_at TEXT DEFAULT (datetime('now'))
+      );
+    `);
+
+    // Login attempts table (rate limiting)
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS login_attempts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ip_address TEXT NOT NULL,
+        attempted_at TEXT DEFAULT (datetime('now'))
+      );
+    `);
   }
   return db;
 }

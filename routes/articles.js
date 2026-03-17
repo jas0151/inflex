@@ -5,6 +5,25 @@ const { getDb } = require('../db');
 
 const router = express.Router();
 
+// Middleware: require admin auth for protected routes
+function requireAuth(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  const db = getDb();
+  const session = db.prepare(`
+    SELECT s.*, u.username FROM admin_sessions s
+    JOIN admin_users u ON s.user_id = u.id
+    WHERE s.token = ? AND s.expires_at > datetime('now')
+  `).get(token);
+  if (!session) {
+    return res.status(401).json({ error: 'Session expired or invalid' });
+  }
+  req.adminUser = { id: session.user_id, username: session.username };
+  next();
+}
+
 // File upload config
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '..', 'uploads'),
@@ -50,7 +69,7 @@ router.get('/', (req, res) => {
   if (search) {
     const q = `%${search}%`;
     articles = db.prepare(`
-      SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, created_at
+      SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, views, created_at
       FROM articles
       WHERE published = 1 AND (scheduled_at IS NULL OR scheduled_at <= datetime('now'))
         AND (title LIKE ? OR tag LIKE ? OR excerpt LIKE ?)
@@ -58,7 +77,7 @@ router.get('/', (req, res) => {
     `).all(q, q, q);
   } else {
     articles = db.prepare(`
-      SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, created_at
+      SELECT id, title, slug, tag, excerpt, cover_image, author, read_time, is_featured, views, created_at
       FROM articles
       WHERE published = 1 AND (scheduled_at IS NULL OR scheduled_at <= datetime('now'))
       ORDER BY created_at DESC
@@ -68,7 +87,7 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/articles/stats — admin dashboard stats
-router.get('/stats', (req, res) => {
+router.get('/stats', requireAuth, (req, res) => {
   const db = getDb();
   const total = db.prepare('SELECT COUNT(*) as count FROM articles').get().count;
   const published = db.prepare('SELECT COUNT(*) as count FROM articles WHERE published = 1').get().count;
@@ -82,7 +101,7 @@ router.get('/stats', (req, res) => {
 });
 
 // GET /api/articles/all — list all articles (admin)
-router.get('/all', (req, res) => {
+router.get('/all', requireAuth, (req, res) => {
   const db = getDb();
   const articles = db.prepare(`
     SELECT * FROM articles ORDER BY created_at DESC
@@ -91,7 +110,7 @@ router.get('/all', (req, res) => {
 });
 
 // POST /api/articles/bulk — bulk operations
-router.post('/bulk', express.json(), (req, res) => {
+router.post('/bulk', requireAuth, express.json(), (req, res) => {
   const db = getDb();
   const { action, ids } = req.body;
   if (!action || !ids || !ids.length) {
@@ -111,7 +130,7 @@ router.post('/bulk', express.json(), (req, res) => {
 });
 
 // POST /api/articles/:id/duplicate — duplicate article
-router.post('/:id/duplicate', (req, res) => {
+router.post('/:id/duplicate', requireAuth, (req, res) => {
   const db = getDb();
   const article = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
   if (!article) return res.status(404).json({ error: 'Article not found' });
@@ -171,7 +190,7 @@ router.get('/:slug', (req, res) => {
 });
 
 // POST /api/articles — create article
-router.post('/', upload.single('cover_image'), (req, res) => {
+router.post('/', requireAuth, upload.single('cover_image'), (req, res) => {
   const db = getDb();
   const { title, tag, excerpt, content, author, is_featured, scheduled_at, meta_description } = req.body;
 
@@ -210,7 +229,7 @@ router.post('/', upload.single('cover_image'), (req, res) => {
 });
 
 // PUT /api/articles/:id — update article
-router.put('/:id', upload.single('cover_image'), (req, res) => {
+router.put('/:id', requireAuth, upload.single('cover_image'), (req, res) => {
   const db = getDb();
   const { title, tag, excerpt, content, author, is_featured, published, scheduled_at, meta_description } = req.body;
   const article = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
@@ -244,7 +263,7 @@ router.put('/:id', upload.single('cover_image'), (req, res) => {
 });
 
 // DELETE /api/articles/:id — delete article
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireAuth, (req, res) => {
   const db = getDb();
   const article = db.prepare('SELECT * FROM articles WHERE id = ?').get(req.params.id);
   if (!article) return res.status(404).json({ error: 'Article not found' });
@@ -254,7 +273,7 @@ router.delete('/:id', (req, res) => {
 });
 
 // POST /api/articles/upload-image — upload image for article content
-router.post('/upload-image', upload.single('image'), (req, res) => {
+router.post('/upload-image', requireAuth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
   res.json({ url: `/uploads/${req.file.filename}` });
 });

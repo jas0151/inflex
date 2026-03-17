@@ -965,6 +965,9 @@
   <div class="topbar-links">
     <a href="/">View Site</a>
     <a href="/inflex-terminal.html">Terminal</a>
+    <a href="#" onclick="showSubscribers()" id="subscribersLink">Subscribers</a>
+    <a href="#" onclick="showChangePassword()">Password</a>
+    <a href="#" onclick="logout()" style="color:var(--accent);">Logout</a>
   </div>
 </div>
 
@@ -1204,6 +1207,38 @@
 <div class="toast-stack" id="toastStack"></div>
 
 <script>
+// ── AUTH CHECK ──
+const adminToken = localStorage.getItem('inflex-admin-token');
+if (!adminToken) {
+  window.location.href = '/login.html';
+}
+
+function authHeaders(extra = {}) {
+  return { 'Authorization': 'Bearer ' + adminToken, ...extra };
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch('/api/auth/me', { headers: authHeaders() });
+    if (!res.ok) {
+      localStorage.removeItem('inflex-admin-token');
+      localStorage.removeItem('inflex-admin-user');
+      window.location.href = '/login.html';
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function logout() {
+  fetch('/api/auth/logout', { method: 'POST', headers: authHeaders() }).catch(() => {});
+  localStorage.removeItem('inflex-admin-token');
+  localStorage.removeItem('inflex-admin-user');
+  window.location.href = '/login.html';
+}
+
 let articles = [];
 let currentId = null;
 let currentFilter = 'all';
@@ -1216,7 +1251,7 @@ let _confirmResolve = null;
 // ── Load articles ──
 async function loadArticles() {
   try {
-    const res = await fetch('/api/articles/all');
+    const res = await fetch('/api/articles/all', { headers: authHeaders() });
     articles = await res.json();
     updateStats();
     renderList();
@@ -1237,7 +1272,7 @@ function updateStats() {
 // ── Dashboard ──
 async function loadDashboard() {
   try {
-    const res = await fetch('/api/articles/stats');
+    const res = await fetch('/api/articles/stats', { headers: authHeaders() });
     const s = await res.json();
     document.getElementById('dashTotal').textContent = s.total;
     document.getElementById('dashBreakdown').innerHTML = `<span class="up">${s.published} published</span> · ${s.drafts} drafts`;
@@ -1407,7 +1442,7 @@ async function saveArticle(e) {
   try {
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(body)
     });
     if (!res.ok) {
@@ -1438,7 +1473,7 @@ async function deleteArticle() {
   if (!confirmed) return;
 
   try {
-    const res = await fetch(`/api/articles/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/articles/${id}`, { method: 'DELETE', headers: authHeaders() });
     if (!res.ok) throw new Error('Delete failed');
     currentId = null;
     currentSlug = null;
@@ -2045,7 +2080,7 @@ async function bulkAction(action) {
   try {
     const res = await fetch('/api/articles/bulk', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action, ids: [...selectedIds] })
     });
     if (!res.ok) throw new Error('Failed');
@@ -2064,7 +2099,7 @@ async function duplicateArticle() {
   const id = document.getElementById('articleId').value;
   if (!id) return;
   try {
-    const res = await fetch(`/api/articles/${id}/duplicate`, { method: 'POST' });
+    const res = await fetch(`/api/articles/${id}/duplicate`, { method: 'POST', headers: authHeaders() });
     if (!res.ok) throw new Error('Failed');
     const dup = await res.json();
     showToast('Article duplicated as draft');
@@ -2192,8 +2227,156 @@ coverArea.addEventListener('drop', (e) => {
   }
 });
 
+// ── SUBSCRIBER MANAGEMENT ──
+async function showSubscribers() {
+  try {
+    const res = await fetch('/api/subscribers', { headers: authHeaders() });
+    if (!res.ok) throw new Error('Failed to load subscribers');
+    const data = await res.json();
+
+    const main = document.querySelector('.main');
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.style.display = 'none';
+
+    main.innerHTML = `
+      <div style="padding:32px;max-width:800px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+          <div>
+            <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);margin-bottom:4px;">Subscribers</h2>
+            <p style="font-size:13px;color:var(--text2);">${data.active} active of ${data.total} total</p>
+          </div>
+          <button onclick="location.reload()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back to Articles</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--border);">
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Email</th>
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Name</th>
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Status</th>
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Date</th>
+              <th style="padding:10px 12px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.subscribers.length === 0 ? '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text2);font-family:\'Barlow\',sans-serif;">No subscribers yet</td></tr>' :
+              data.subscribers.map(s => `
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:10px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);">${escHtml(s.email)}</td>
+                  <td style="padding:10px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text2);">${escHtml(s.name || '—')}</td>
+                  <td style="padding:10px 12px;">
+                    <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;${s.is_active ? 'color:var(--green);background:rgba(63,185,80,0.1);' : 'color:var(--accent);background:rgba(200,0,26,0.1);'}">${s.is_active ? 'Active' : 'Inactive'}</span>
+                  </td>
+                  <td style="padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--text2);">${formatDate(s.subscribed_at)}</td>
+                  <td style="padding:10px 12px;">
+                    <button onclick="removeSubscriber(${s.id})" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--text2);padding:4px 10px;cursor:pointer;" title="Remove">&times;</button>
+                  </td>
+                </tr>
+              `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (e) {
+    showToast('Failed to load subscribers', true);
+  }
+}
+
+async function removeSubscriber(id) {
+  const confirmed = await showConfirmModal('Remove Subscriber', 'Are you sure you want to permanently remove this subscriber?');
+  if (!confirmed) return;
+  try {
+    const res = await fetch(`/api/subscribers/admin/${id}`, { method: 'DELETE', headers: authHeaders() });
+    if (!res.ok) throw new Error('Failed');
+    showToast('Subscriber removed');
+    showSubscribers();
+  } catch (e) {
+    showToast('Failed to remove subscriber', true);
+  }
+}
+
+// ── CHANGE PASSWORD ──
+function showChangePassword() {
+  const main = document.querySelector('.main');
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.style.display = 'none';
+
+  main.innerHTML = `
+    <div style="padding:32px;max-width:400px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);">Change Password</h2>
+        <button onclick="location.reload()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back</button>
+      </div>
+      <div id="pwChangeError" style="font-family:'Barlow',sans-serif;font-size:13px;color:var(--accent);margin-bottom:12px;min-height:20px;"></div>
+      <div id="pwChangeSuccess" style="font-family:'Barlow',sans-serif;font-size:13px;color:var(--green);margin-bottom:12px;min-height:20px;"></div>
+      <form onsubmit="handleChangePassword(event)">
+        <div style="margin-bottom:16px;">
+          <label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:6px;">Current Password</label>
+          <input type="password" id="pwCurrent" required style="width:100%;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:6px;">New Password</label>
+          <input type="password" id="pwNew" required minlength="8" style="width:100%;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:6px;">Confirm New Password</label>
+          <input type="password" id="pwConfirm" required minlength="8" style="width:100%;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;">
+        </div>
+        <button type="submit" id="pwChangeBtn" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:var(--accent);color:#fff;border:none;padding:12px 24px;cursor:pointer;">Update Password</button>
+      </form>
+    </div>
+  `;
+}
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const errorEl = document.getElementById('pwChangeError');
+  const successEl = document.getElementById('pwChangeSuccess');
+  const btn = document.getElementById('pwChangeBtn');
+  errorEl.textContent = '';
+  successEl.textContent = '';
+
+  const currentPassword = document.getElementById('pwCurrent').value;
+  const newPassword = document.getElementById('pwNew').value;
+  const confirm = document.getElementById('pwConfirm').value;
+
+  if (newPassword !== confirm) {
+    errorEl.textContent = 'New passwords do not match';
+    return;
+  }
+  if (newPassword.length < 8) {
+    errorEl.textContent = 'Password must be at least 8 characters';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try {
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error;
+    } else {
+      successEl.textContent = 'Password changed successfully';
+      document.getElementById('pwCurrent').value = '';
+      document.getElementById('pwNew').value = '';
+      document.getElementById('pwConfirm').value = '';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Connection error';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Update Password';
+}
+
 // ── Init ──
-loadArticles();
+checkAuth().then(ok => {
+  if (ok) loadArticles();
+});
 </script>
 </body>
 </html>
