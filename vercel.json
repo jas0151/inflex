@@ -1,13 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/auth/login", "destination": "/api/auth/login" },
-    { "source": "/api/auth/logout", "destination": "/api/auth/logout" },
-    { "source": "/api/auth/me", "destination": "/api/auth/me" },
-    { "source": "/api/auth/setup", "destination": "/api/auth/setup" },
-    { "source": "/api/auth/check-setup", "destination": "/api/auth/check-setup" },
-    { "source": "/api/auth/change-password", "destination": "/api/auth/change-password" },
+    { "source": "/api/auth/:action", "destination": "/api/auth/[action]" },
     { "source": "/api/subscribers/:action", "destination": "/api/subscribers/[action]" },
-    { "source": "/api/subscribers", "destination": "/api/subscribers/index" },
+    { "source": "/api/subscribers", "destination": "/api/subscribers/[action]" },
     { "source": "/api/articles/all", "destination": "/api/articles/all" },
     { "source": "/api/articles/stats", "destination": "/api/articles/stats" },
     { "source": "/api/articles/bulk", "destination": "/api/articles/bulk" },
