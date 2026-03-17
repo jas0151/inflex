@@ -2,27 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { getDb } = require('../db');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
-
-// Middleware: require admin auth for protected routes
-function requireAuth(req, res, next) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  if (!token) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-  const db = getDb();
-  const session = db.prepare(`
-    SELECT s.*, u.username FROM admin_sessions s
-    JOIN admin_users u ON s.user_id = u.id
-    WHERE s.token = ? AND s.expires_at > datetime('now')
-  `).get(token);
-  if (!session) {
-    return res.status(401).json({ error: 'Session expired or invalid' });
-  }
-  req.adminUser = { id: session.user_id, username: session.username };
-  next();
-}
 
 // File upload config
 const storage = multer.diskStorage({

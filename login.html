@@ -497,19 +497,29 @@
 let isSetupMode = false;
 
 // Check if already authenticated
-const existingToken = localStorage.getItem('inflex-admin-token');
-if (existingToken) {
-  fetch('/api/auth/me', {
-    headers: { 'Authorization': 'Bearer ' + existingToken }
-  }).then(r => {
-    if (r.ok) window.location.href = '/admin.html';
-  });
-}
+(async function checkExistingSession() {
+  const existingToken = localStorage.getItem('inflex-admin-token');
+  if (!existingToken) { checkSetup(); return; }
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + existingToken }
+    });
+    if (res.ok) {
+      window.location.href = '/admin.html';
+      return;
+    }
+    // Token invalid — clear stale data
+    localStorage.removeItem('inflex-admin-token');
+    localStorage.removeItem('inflex-admin-user');
+  } catch (e) { /* ignore network errors */ }
+  checkSetup();
+})();
 
 // Check if admin exists
 async function checkSetup() {
   try {
     const res = await fetch('/api/auth/check-setup');
+    if (!res.ok) return;
     const data = await res.json();
     if (!data.adminExists) {
       enterSetupMode();
@@ -543,8 +553,6 @@ function exitSetupMode() {
   document.getElementById('loginOptions').style.display = 'flex';
 }
 
-checkSetup();
-
 // Password visibility toggle
 function togglePasswordVisibility(inputId) {
   const input = document.getElementById(inputId);
@@ -570,10 +578,9 @@ function showError(msg) {
   const errorEl = document.getElementById('loginError');
   errorEl.textContent = msg;
   errorEl.classList.add('visible');
-  // Shake the card
   const card = document.getElementById('loginCard');
   card.classList.remove('shake');
-  void card.offsetWidth; // reflow to restart animation
+  void card.offsetWidth;
   card.classList.add('shake');
 }
 
@@ -581,6 +588,12 @@ function clearError() {
   const errorEl = document.getElementById('loginError');
   errorEl.textContent = '';
   errorEl.classList.remove('visible');
+}
+
+function resetBtn() {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = false;
+  btn.textContent = isSetupMode ? 'Create Admin Account' : 'Sign In';
 }
 
 function showSuccess(message) {
@@ -607,19 +620,24 @@ async function handleLogin(e) {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
 
+  if (!username || !password) {
+    showError('Username and password are required');
+    resetBtn();
+    return;
+  }
+
   try {
+    // Setup flow: create admin account first
     if (isSetupMode) {
       const confirm = document.getElementById('confirmPassword').value;
       if (password !== confirm) {
         showError('Passwords do not match');
-        btn.disabled = false;
-        btn.textContent = 'Create Admin Account';
+        resetBtn();
         return;
       }
       if (password.length < 8) {
         showError('Password must be at least 8 characters');
-        btn.disabled = false;
-        btn.textContent = 'Create Admin Account';
+        resetBtn();
         return;
       }
 
@@ -628,15 +646,15 @@ async function handleLogin(e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-      const setupData = await setupRes.json();
+
       if (!setupRes.ok) {
+        const setupData = await setupRes.json();
         if (setupRes.status === 403) {
+          // Admin already exists — switch to login mode and continue
           exitSetupMode();
-          // Fall through to login below
         } else {
-          showError(setupData.error);
-          btn.disabled = false;
-          btn.textContent = 'Create Admin Account';
+          showError(setupData.error || 'Setup failed');
+          resetBtn();
           return;
         }
       }
@@ -651,32 +669,30 @@ async function handleLogin(e) {
     const loginData = await loginRes.json();
 
     if (!loginRes.ok) {
-      showError(loginData.error);
-      btn.disabled = false;
-      btn.textContent = isSetupMode ? 'Create Admin Account' : 'Sign In';
+      showError(loginData.error || 'Login failed');
+      resetBtn();
       return;
     }
 
-    // Store token and redirect
+    // Store credentials
     localStorage.setItem('inflex-admin-token', loginData.token);
     localStorage.setItem('inflex-admin-user', loginData.username);
 
-    // Remember me — store username for next visit
-    if (document.getElementById('rememberMe') && document.getElementById('rememberMe').checked) {
+    // Remember me
+    const rememberEl = document.getElementById('rememberMe');
+    if (rememberEl && rememberEl.checked) {
       localStorage.setItem('inflex-remember-user', username);
     } else {
       localStorage.removeItem('inflex-remember-user');
     }
 
-    // Show success animation then redirect
-    showSuccess('Welcome back, ' + loginData.username);
-    setTimeout(() => {
-      window.location.href = '/admin.html';
-    }, 800);
+    // Success animation then redirect
+    showSuccess('Welcome, ' + loginData.username);
+    setTimeout(() => { window.location.href = '/admin.html'; }, 800);
+
   } catch (err) {
     showError('Connection error. Please try again.');
-    btn.disabled = false;
-    btn.textContent = isSetupMode ? 'Create Admin Account' : 'Sign In';
+    resetBtn();
   }
 }
 
@@ -686,7 +702,6 @@ if (remembered) {
   document.getElementById('username').value = remembered;
   const cb = document.getElementById('rememberMe');
   if (cb) cb.checked = true;
-  // Focus password field instead
   document.getElementById('password').focus();
 }
 
