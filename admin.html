@@ -955,7 +955,7 @@
   }
 </style>
 </head>
-<body>
+<body style="visibility:hidden;">
 
 <div class="topbar">
   <div class="topbar-left">
@@ -1252,6 +1252,7 @@ let _confirmResolve = null;
 async function loadArticles() {
   try {
     const res = await fetch('/api/articles/all', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
     articles = await res.json();
     updateStats();
     renderList();
@@ -2231,21 +2232,23 @@ coverArea.addEventListener('drop', (e) => {
 async function showSubscribers() {
   try {
     const res = await fetch('/api/subscribers', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
     if (!res.ok) throw new Error('Failed to load subscribers');
     const data = await res.json();
 
-    const main = document.querySelector('.main');
+    saveEditorState();
+    const editorWrap = document.querySelector('.editor-wrap');
     const sidebar = document.querySelector('.sidebar');
     sidebar.style.display = 'none';
 
-    main.innerHTML = `
+    editorWrap.innerHTML = `
       <div style="padding:32px;max-width:800px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
           <div>
             <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);margin-bottom:4px;">Subscribers</h2>
             <p style="font-size:13px;color:var(--text2);">${data.active} active of ${data.total} total</p>
           </div>
-          <button onclick="location.reload()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back to Articles</button>
+          <button onclick="restoreArticleView()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back to Articles</button>
         </div>
         <table style="width:100%;border-collapse:collapse;">
           <thead>
@@ -2286,6 +2289,7 @@ async function removeSubscriber(id) {
   if (!confirmed) return;
   try {
     const res = await fetch(`/api/subscribers/admin/${id}`, { method: 'DELETE', headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
     if (!res.ok) throw new Error('Failed');
     showToast('Subscriber removed');
     showSubscribers();
@@ -2296,15 +2300,16 @@ async function removeSubscriber(id) {
 
 // ── CHANGE PASSWORD ──
 function showChangePassword() {
-  const main = document.querySelector('.main');
+  saveEditorState();
+  const editorWrap = document.querySelector('.editor-wrap');
   const sidebar = document.querySelector('.sidebar');
   sidebar.style.display = 'none';
 
-  main.innerHTML = `
+  editorWrap.innerHTML = `
     <div style="padding:32px;max-width:400px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
         <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);">Change Password</h2>
-        <button onclick="location.reload()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back</button>
+        <button onclick="restoreArticleView()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back</button>
       </div>
       <div id="pwChangeError" style="font-family:'Barlow',sans-serif;font-size:13px;color:var(--accent);margin-bottom:12px;min-height:20px;"></div>
       <div id="pwChangeSuccess" style="font-family:'Barlow',sans-serif;font-size:13px;color:var(--green);margin-bottom:12px;min-height:20px;"></div>
@@ -2357,6 +2362,7 @@ async function handleChangePassword(e) {
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ currentPassword, newPassword })
     });
+    if (res.status === 401) { logout(); return; }
     const data = await res.json();
     if (!res.ok) {
       errorEl.textContent = data.error;
@@ -2368,14 +2374,39 @@ async function handleChangePassword(e) {
     }
   } catch (err) {
     errorEl.textContent = 'Connection error';
+    document.getElementById('pwCurrent').value = '';
+    document.getElementById('pwNew').value = '';
+    document.getElementById('pwConfirm').value = '';
   }
   btn.disabled = false;
   btn.textContent = 'Update Password';
 }
 
+// ── Restore article view (from subscribers/password panels) ──
+let _savedEditorHTML = null;
+
+function saveEditorState() {
+  const editorWrap = document.querySelector('.editor-wrap');
+  if (editorWrap) _savedEditorHTML = editorWrap.innerHTML;
+}
+
+function restoreArticleView() {
+  const sidebar = document.querySelector('.sidebar');
+  const editorWrap = document.querySelector('.editor-wrap');
+  sidebar.style.display = '';
+  if (_savedEditorHTML) {
+    editorWrap.innerHTML = _savedEditorHTML;
+    _savedEditorHTML = null;
+  }
+  loadArticles();
+}
+
 // ── Init ──
 checkAuth().then(ok => {
-  if (ok) loadArticles();
+  if (ok) {
+    document.body.style.visibility = 'visible';
+    loadArticles();
+  }
 });
 </script>
 </body>
