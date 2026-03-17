@@ -271,12 +271,23 @@ async function handleLogin(e) {
       });
       const setupData = await setupRes.json();
       if (!setupRes.ok) {
-        errorEl.textContent = setupData.error;
-        btn.disabled = false;
-        btn.textContent = 'Create Admin Account';
-        return;
+        // If admin already exists, switch to login mode and retry
+        if (setupRes.status === 403) {
+          isSetupMode = false;
+          document.getElementById('setupNotice').style.display = 'none';
+          document.getElementById('confirmField').style.display = 'none';
+          document.getElementById('pwStrength').style.display = 'none';
+          document.getElementById('loginBtn').textContent = 'Sign In';
+          document.getElementById('loginSubtitle').textContent = 'Admin Dashboard';
+          // Fall through to login below
+        } else {
+          errorEl.textContent = setupData.error;
+          btn.disabled = false;
+          btn.textContent = 'Create Admin Account';
+          return;
+        }
       }
-      // Account created, now login
+      // Account created (or already existed), now login
     }
 
     // Login
