@@ -2299,65 +2299,100 @@ async function removeSubscriber(id) {
 }
 
 // ── ACCOUNT MANAGEMENT PANEL ──
+const _inputStyle = "font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;";
+const _btnStyle = "font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--accent);color:#fff;border:none;padding:10px 18px;cursor:pointer;border-radius:4px;white-space:nowrap;";
+const _sectionLabel = "font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;";
+const _sectionBox = "background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;";
+
 function showAccountPanel() {
   saveEditorState();
   const editorWrap = document.querySelector('.editor-wrap');
   const sidebar = document.querySelector('.sidebar');
   sidebar.style.display = 'none';
-  const currentUser = localStorage.getItem('inflex-admin-user') || 'admin';
+  const currentEmail = localStorage.getItem('inflex-admin-user') || '';
+  const currentDisplay = localStorage.getItem('inflex-admin-display') || currentEmail.split('@')[0];
+  const initial = (currentDisplay || currentEmail || 'A').charAt(0).toUpperCase();
 
   editorWrap.innerHTML = `
-    <div style="padding:32px;max-width:560px;">
+    <div style="padding:32px;max-width:620px;overflow-y:auto;max-height:calc(100vh - 56px);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
         <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);">Account Settings</h2>
         <button onclick="restoreArticleView()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back</button>
       </div>
 
       <!-- Profile Info -->
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;">Profile</div>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;">${currentUser.charAt(0).toUpperCase()}</div>
+      <div style="${_sectionBox}">
+        <div style="${_sectionLabel}">Your Profile</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;">${initial}</div>
           <div>
-            <div style="font-size:16px;font-weight:600;color:var(--text);" id="accountDisplayName">${currentUser}</div>
-            <div style="font-size:12px;color:var(--text2);">Administrator</div>
+            <div style="font-size:16px;font-weight:600;color:var(--text);" id="accountDisplayName">${currentDisplay}</div>
+            <div style="font-size:12px;color:var(--text2);" id="accountEmail">${currentEmail}</div>
           </div>
         </div>
+        <div id="displayNameMsg" style="font-size:13px;margin-bottom:6px;min-height:16px;"></div>
+        <form onsubmit="handleChangeDisplayName(event)" style="display:flex;gap:8px;">
+          <input type="text" id="newDisplayName" placeholder="Display name" value="${currentDisplay}" style="flex:1;${_inputStyle}">
+          <button type="submit" id="displayNameBtn" style="${_btnStyle}">Save</button>
+        </form>
       </div>
 
-      <!-- Change Username -->
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;">Change Username</div>
-        <div id="usernameMsg" style="font-size:13px;margin-bottom:8px;min-height:18px;"></div>
-        <form onsubmit="handleChangeUsername(event)" style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="newUsername" placeholder="New username" required minlength="2" style="flex:1;min-width:150px;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;">
-          <input type="password" id="usernamePassword" placeholder="Confirm password" required style="flex:1;min-width:150px;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;">
-          <button type="submit" id="usernameBtn" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--accent);color:#fff;border:none;padding:10px 18px;cursor:pointer;border-radius:4px;white-space:nowrap;">Update</button>
+      <!-- Change Email -->
+      <div style="${_sectionBox}">
+        <div style="${_sectionLabel}">Change Email</div>
+        <div id="emailMsg" style="font-size:13px;margin-bottom:8px;min-height:18px;"></div>
+        <form onsubmit="handleChangeEmail(event)" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="email" id="newEmail" placeholder="newemail@gmail.com" required style="flex:1;min-width:180px;${_inputStyle}">
+          <input type="password" id="emailPassword" placeholder="Confirm password" required style="flex:1;min-width:140px;${_inputStyle}">
+          <button type="submit" id="emailBtn" style="${_btnStyle}">Update</button>
         </form>
       </div>
 
       <!-- Change Password -->
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;">Change Password</div>
+      <div style="${_sectionBox}">
+        <div style="${_sectionLabel}">Change Password</div>
         <div id="pwChangeError" style="font-size:13px;color:var(--accent);margin-bottom:8px;min-height:18px;"></div>
         <div id="pwChangeSuccess" style="font-size:13px;color:var(--green);margin-bottom:8px;min-height:18px;"></div>
         <form onsubmit="handleChangePassword(event)">
           <div style="margin-bottom:12px;">
-            <input type="password" id="pwCurrent" required placeholder="Current password" style="width:100%;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;">
+            <input type="password" id="pwCurrent" required placeholder="Current password" style="width:100%;${_inputStyle}">
           </div>
           <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-            <input type="password" id="pwNew" required minlength="8" placeholder="New password (min 8 chars)" style="flex:1;min-width:150px;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;">
-            <input type="password" id="pwConfirm" required minlength="8" placeholder="Confirm new password" style="flex:1;min-width:150px;font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;">
+            <input type="password" id="pwNew" required minlength="8" placeholder="New password (min 8 chars)" style="flex:1;min-width:150px;${_inputStyle}">
+            <input type="password" id="pwConfirm" required minlength="8" placeholder="Confirm new password" style="flex:1;min-width:150px;${_inputStyle}">
           </div>
-          <button type="submit" id="pwChangeBtn" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--accent);color:#fff;border:none;padding:10px 18px;cursor:pointer;border-radius:4px;">Update Password</button>
+          <button type="submit" id="pwChangeBtn" style="${_btnStyle}">Update Password</button>
         </form>
       </div>
 
-      <!-- Active Sessions -->
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;">
+      <!-- Manage Admins -->
+      <div style="${_sectionBox}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Active Sessions</div>
-          <button onclick="revokeAllSessions()" id="revokeAllBtn" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;color:var(--accent);border:1px solid var(--accent);padding:5px 10px;cursor:pointer;border-radius:3px;">Revoke All Others</button>
+          <div style="${_sectionLabel}margin-bottom:0;">Admin Accounts</div>
+          <button onclick="showAddAdminForm()" id="addAdminToggle" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--green);color:#000;border:none;padding:5px 10px;cursor:pointer;border-radius:3px;">+ Add Admin</button>
+        </div>
+        <div id="addAdminForm" style="display:none;margin-bottom:14px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
+          <div id="addAdminMsg" style="font-size:13px;margin-bottom:8px;min-height:16px;"></div>
+          <form onsubmit="handleAddAdmin(event)">
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+              <input type="email" id="adminNewEmail" placeholder="admin@gmail.com" required style="flex:1;min-width:180px;${_inputStyle}">
+              <input type="text" id="adminNewName" placeholder="Display name" style="flex:1;min-width:120px;${_inputStyle}">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input type="password" id="adminNewPassword" placeholder="Password (min 8 chars)" required minlength="8" style="flex:1;min-width:180px;${_inputStyle}">
+              <button type="submit" id="addAdminBtn" style="${_btnStyle}">Create Admin</button>
+              <button type="button" onclick="document.getElementById('addAdminForm').style.display='none'" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--text2);padding:10px 14px;cursor:pointer;border-radius:4px;">Cancel</button>
+            </div>
+          </form>
+        </div>
+        <div id="adminsContainer" style="font-size:13px;color:var(--text2);">Loading...</div>
+      </div>
+
+      <!-- Active Sessions -->
+      <div style="${_sectionBox}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="${_sectionLabel}margin-bottom:0;">Active Sessions</div>
+          <button onclick="revokeAllSessions()" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;color:var(--accent);border:1px solid var(--accent);padding:5px 10px;cursor:pointer;border-radius:3px;">Revoke All Others</button>
         </div>
         <div id="sessionsContainer" style="font-size:13px;color:var(--text2);">Loading...</div>
       </div>
@@ -2371,8 +2406,108 @@ function showAccountPanel() {
   `;
 
   loadSessions();
+  loadAdmins();
 }
 
+function showAddAdminForm() {
+  document.getElementById('addAdminForm').style.display = 'block';
+  document.getElementById('adminNewEmail').focus();
+}
+
+// ── Admin list ──
+async function loadAdmins() {
+  const container = document.getElementById('adminsContainer');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/auth/admins', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!data.admins || !data.admins.length) {
+      container.textContent = 'No admins found';
+      return;
+    }
+    const currentEmail = localStorage.getItem('inflex-admin-user') || '';
+    container.innerHTML = data.admins.map(a => {
+      const isMe = a.username === currentEmail;
+      const name = a.display_name || a.username.split('@')[0];
+      const initial = name.charAt(0).toUpperCase();
+      const roleBadge = a.role === 'owner'
+        ? '<span style="font-size:9px;letter-spacing:0.06em;text-transform:uppercase;background:var(--yellow);color:#000;padding:2px 6px;border-radius:3px;font-weight:700;">Owner</span>'
+        : '<span style="font-size:9px;letter-spacing:0.06em;text-transform:uppercase;background:var(--blue);color:#000;padding:2px 6px;border-radius:3px;font-weight:700;">Admin</span>';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${isMe ? 'var(--accent)' : 'var(--surface3)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${isMe ? '#fff' : 'var(--text2)'};">${initial}</div>
+          <div>
+            <div style="font-size:13px;color:var(--text);font-weight:${isMe ? '600' : '400'};">${name} ${isMe ? '(you)' : ''} ${roleBadge}</div>
+            <div style="font-size:11px;color:var(--text2);">${a.username}</div>
+          </div>
+        </div>
+        ${isMe ? '' : '<button onclick="removeAdmin(' + a.id + ',\'' + a.username.replace(/'/g, "\\'") + '\')" style="font-size:10px;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid #f85149;color:#f85149;padding:3px 8px;border-radius:3px;cursor:pointer;">Remove</button>'}
+      </div>`;
+    }).join('');
+  } catch (e) {
+    container.textContent = 'Failed to load admins';
+  }
+}
+
+async function handleAddAdmin(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('addAdminMsg');
+  const btn = document.getElementById('addAdminBtn');
+  msgEl.textContent = '';
+  msgEl.style.color = '';
+
+  const email = document.getElementById('adminNewEmail').value.trim();
+  const displayName = document.getElementById('adminNewName').value.trim();
+  const password = document.getElementById('adminNewPassword').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  try {
+    const res = await fetch('/api/auth/admins', {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email, password, displayName })
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) {
+      msgEl.style.color = 'var(--accent)';
+      msgEl.textContent = data.error;
+    } else {
+      msgEl.style.color = 'var(--green)';
+      msgEl.textContent = 'Admin created: ' + email;
+      document.getElementById('adminNewEmail').value = '';
+      document.getElementById('adminNewName').value = '';
+      document.getElementById('adminNewPassword').value = '';
+      loadAdmins();
+      showToast('Admin account created');
+    }
+  } catch (err) {
+    msgEl.style.color = 'var(--accent)';
+    msgEl.textContent = 'Connection error';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Create Admin';
+}
+
+async function removeAdmin(id, email) {
+  if (!confirm('Remove admin ' + email + '? They will lose access immediately.')) return;
+  try {
+    const res = await fetch('/api/auth/admins/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message);
+      loadAdmins();
+    } else {
+      showToast(data.error || 'Failed to remove admin', true);
+    }
+  } catch (e) { showToast('Connection error', true); }
+}
+
+// ── Sessions ──
 async function loadSessions() {
   const container = document.getElementById('sessionsContainer');
   if (!container) return;
@@ -2413,10 +2548,7 @@ async function revokeSession(id) {
   try {
     const res = await fetch('/api/auth/sessions/' + id, { method: 'DELETE', headers: authHeaders() });
     if (res.status === 401) { logout(); return; }
-    if (res.ok) {
-      showToast('Session revoked');
-      loadSessions();
-    }
+    if (res.ok) { showToast('Session revoked'); loadSessions(); }
   } catch (e) { showToast('Failed to revoke session', true); }
 }
 
@@ -2425,58 +2557,66 @@ async function revokeAllSessions() {
     const res = await fetch('/api/auth/sessions/revoke-all', { method: 'POST', headers: authHeaders() });
     if (res.status === 401) { logout(); return; }
     const data = await res.json();
-    if (res.ok) {
-      showToast(data.message);
-      loadSessions();
-    }
+    if (res.ok) { showToast(data.message); loadSessions(); }
   } catch (e) { showToast('Failed to revoke sessions', true); }
 }
 
-async function handleChangeUsername(e) {
+// ── Profile updates ──
+async function handleChangeDisplayName(e) {
   e.preventDefault();
-  const msgEl = document.getElementById('usernameMsg');
-  const btn = document.getElementById('usernameBtn');
+  const msgEl = document.getElementById('displayNameMsg');
+  const btn = document.getElementById('displayNameBtn');
+  const name = document.getElementById('newDisplayName').value.trim();
   msgEl.textContent = '';
-  msgEl.style.color = '';
 
-  const newUsername = document.getElementById('newUsername').value.trim();
-  const password = document.getElementById('usernamePassword').value;
+  if (!name) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Name cannot be empty'; return; }
 
-  if (!newUsername || newUsername.length < 2) {
-    msgEl.style.color = 'var(--accent)';
-    msgEl.textContent = 'Username must be at least 2 characters';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Updating...';
-
+  btn.disabled = true; btn.textContent = 'Saving...';
   try {
-    const res = await fetch('/api/auth/change-username', {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ newUsername, password })
+    const res = await fetch('/api/auth/change-display-name', {
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ displayName: name })
     });
     if (res.status === 401) { logout(); return; }
     const data = await res.json();
-    if (!res.ok) {
-      msgEl.style.color = 'var(--accent)';
-      msgEl.textContent = data.error;
-    } else {
-      msgEl.style.color = 'var(--green)';
-      msgEl.textContent = 'Username updated successfully';
-      localStorage.setItem('inflex-admin-user', newUsername);
-      const displayEl = document.getElementById('accountDisplayName');
-      if (displayEl) displayEl.textContent = newUsername;
-      document.getElementById('newUsername').value = '';
-      document.getElementById('usernamePassword').value = '';
+    if (res.ok) {
+      msgEl.style.color = 'var(--green)'; msgEl.textContent = 'Display name updated';
+      localStorage.setItem('inflex-admin-display', name);
+      const el = document.getElementById('accountDisplayName');
+      if (el) el.textContent = name;
+    } else { msgEl.style.color = 'var(--accent)'; msgEl.textContent = data.error; }
+  } catch (err) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Connection error'; }
+  btn.disabled = false; btn.textContent = 'Save';
+}
+
+async function handleChangeEmail(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('emailMsg');
+  const btn = document.getElementById('emailBtn');
+  msgEl.textContent = ''; msgEl.style.color = '';
+
+  const newEmail = document.getElementById('newEmail').value.trim();
+  const password = document.getElementById('emailPassword').value;
+
+  btn.disabled = true; btn.textContent = 'Updating...';
+  try {
+    const res = await fetch('/api/auth/change-email', {
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ newEmail, password })
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = data.error; }
+    else {
+      msgEl.style.color = 'var(--green)'; msgEl.textContent = 'Email updated to ' + data.username;
+      localStorage.setItem('inflex-admin-user', data.username);
+      const el = document.getElementById('accountEmail');
+      if (el) el.textContent = data.username;
+      document.getElementById('newEmail').value = '';
+      document.getElementById('emailPassword').value = '';
     }
-  } catch (err) {
-    msgEl.style.color = 'var(--accent)';
-    msgEl.textContent = 'Connection error';
-  }
-  btn.disabled = false;
-  btn.textContent = 'Update';
+  } catch (err) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Connection error'; }
+  btn.disabled = false; btn.textContent = 'Update';
 }
 
 async function handleChangePassword(e) {
@@ -2484,46 +2624,32 @@ async function handleChangePassword(e) {
   const errorEl = document.getElementById('pwChangeError');
   const successEl = document.getElementById('pwChangeSuccess');
   const btn = document.getElementById('pwChangeBtn');
-  errorEl.textContent = '';
-  successEl.textContent = '';
+  errorEl.textContent = ''; successEl.textContent = '';
 
   const currentPassword = document.getElementById('pwCurrent').value;
   const newPassword = document.getElementById('pwNew').value;
   const confirm = document.getElementById('pwConfirm').value;
 
-  if (newPassword !== confirm) {
-    errorEl.textContent = 'New passwords do not match';
-    return;
-  }
-  if (newPassword.length < 8) {
-    errorEl.textContent = 'Password must be at least 8 characters';
-    return;
-  }
+  if (newPassword !== confirm) { errorEl.textContent = 'New passwords do not match'; return; }
+  if (newPassword.length < 8) { errorEl.textContent = 'Password must be at least 8 characters'; return; }
 
-  btn.disabled = true;
-  btn.textContent = 'Updating...';
-
+  btn.disabled = true; btn.textContent = 'Updating...';
   try {
     const res = await fetch('/api/auth/change-password', {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ currentPassword, newPassword })
     });
     if (res.status === 401) { logout(); return; }
     const data = await res.json();
-    if (!res.ok) {
-      errorEl.textContent = data.error;
-    } else {
+    if (!res.ok) { errorEl.textContent = data.error; }
+    else {
       successEl.textContent = 'Password changed successfully';
       document.getElementById('pwCurrent').value = '';
       document.getElementById('pwNew').value = '';
       document.getElementById('pwConfirm').value = '';
     }
-  } catch (err) {
-    errorEl.textContent = 'Connection error';
-  }
-  btn.disabled = false;
-  btn.textContent = 'Update Password';
+  } catch (err) { errorEl.textContent = 'Connection error'; }
+  btn.disabled = false; btn.textContent = 'Update Password';
 }
 
 // ── Restore article view (from subscribers/password panels) ──

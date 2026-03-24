@@ -1312,36 +1312,142 @@ function timeAgo(dateStr) {
   return `${Math.floor(diff/1440)}d ago`;
 }
 
-async function fetchRSS(url, source) {
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxy);
-  const data = await res.json();
+// ── CORS proxy pool — rotate to avoid rate limits ──
+const CORS_PROXIES = [
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.cors.lol/?url=${encodeURIComponent(url)}`,
+];
+
+// Fetch raw text from a URL through a CORS proxy with timeout
+async function fetchViaProxy(url, timeoutMs = 10000) {
+  const errors = [];
+  for (const makeProxy of CORS_PROXIES) {
+    const proxyUrl = makeProxy(url);
+    try {
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(timeoutMs) });
+      if (!res.ok) { errors.push(`${res.status}`); continue; }
+      const contentType = res.headers.get('content-type') || '';
+      // allorigins returns JSON wrapper, others return raw text
+      if (contentType.includes('application/json')) {
+        const json = await res.json();
+        const body = json.contents || json.body || json.data || '';
+        if (body && body.length > 100) return body;
+        errors.push('empty json body'); continue;
+      }
+      const text = await res.text();
+      if (text && text.length > 100) return text;
+      errors.push('empty text'); continue;
+    } catch (e) {
+      errors.push(e.message || 'unknown'); continue;
+    }
+  }
+  throw new Error(`All proxies failed for ${url}: ${errors.join(', ')}`);
+}
+
+// Parse XML handling both RSS <item> and Atom <entry> formats
+function parseXMLFeed(xmlText, source) {
   const parser = new DOMParser();
-  const xml = parser.parseFromString(data.contents, 'text/xml');
-  const items = [...xml.querySelectorAll('item')].slice(0, 15);
-  return items.map(item => {
-    const title   = item.querySelector('title')?.textContent?.trim() || '';
-    const desc    = item.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim().slice(0,180) || '';
-    const link    = item.querySelector('link')?.textContent?.trim() || '#';
-    const pubDate = item.querySelector('pubDate')?.textContent || new Date().toString();
-    const cat     = categorize(title, desc);
-    const impact  = impactLevel(title);
+  const xml = parser.parseFromString(xmlText, 'text/xml');
+
+  // Check for parse errors
+  if (xml.querySelector('parsererror')) {
+    // Try parsing as HTML fragment (some feeds return escaped HTML)
+    const cleaned = xmlText.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, '&amp;');
+    const retry = parser.parseFromString(cleaned, 'text/xml');
+    if (retry.querySelector('parsererror')) throw new Error('XML parse failed');
+    return extractItems(retry, source);
+  }
+  return extractItems(xml, source);
+}
+
+function extractItems(xml, source) {
+  // Try RSS format first
+  let items = [...xml.querySelectorAll('item')];
+
+  // Fallback to Atom format
+  if (!items.length) {
+    items = [...xml.querySelectorAll('entry')];
+  }
+
+  return items.slice(0, 15).map(item => {
+    // Title
+    const title = item.querySelector('title')?.textContent?.trim() || '';
+
+    // Description — RSS uses <description>, Atom uses <summary> or <content>
+    const rawDesc = item.querySelector('description')?.textContent
+      || item.querySelector('summary')?.textContent
+      || item.querySelector('content')?.textContent
+      || '';
+    const desc = rawDesc.replace(/<[^>]+>/g, '').trim().slice(0, 180);
+
+    // Link — RSS uses <link> text, Atom uses <link href="...">
+    const linkEl = item.querySelector('link');
+    const link = linkEl?.getAttribute('href') || linkEl?.textContent?.trim() || '#';
+
+    // Date — RSS uses <pubDate>, Atom uses <published> or <updated>
+    const pubDate = item.querySelector('pubDate')?.textContent
+      || item.querySelector('published')?.textContent
+      || item.querySelector('updated')?.textContent
+      || item.querySelector('dc\\:date')?.textContent
+      || new Date().toString();
+
+    const cat = categorize(title, desc);
+    const impact = impactLevel(title);
     return { title, desc, link, pubDate, source, cat, impact };
-  });
+  }).filter(item => item.title.length > 0);
+}
+
+async function fetchRSS(url, source) {
+  const xmlText = await fetchViaProxy(url);
+  return parseXMLFeed(xmlText, source);
+}
+
+// Fetch feeds in small batches to avoid rate-limiting
+async function fetchInBatches(sources, batchSize = 3, delayMs = 600) {
+  const results = [];
+  for (let i = 0; i < sources.length; i += batchSize) {
+    const batch = sources.slice(i, i + batchSize);
+    const batchResults = await Promise.allSettled(
+      batch.map(s => fetchRSS(s.url, s.source))
+    );
+    results.push(...batchResults);
+    // Small delay between batches to avoid proxy rate limits
+    if (i + batchSize < sources.length) {
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  return results;
 }
 
 async function loadNews() {
-  document.getElementById('newsFeed').innerHTML = '<div class="loading"><span class="spinner"></span>Fetching latest news...</div>';
+  const feedEl = document.getElementById('newsFeed');
+  feedEl.innerHTML = '<div class="loading"><span class="spinner"></span>Fetching latest news...</div>';
   try {
-    const results = await Promise.allSettled(RSS_SOURCES.map(s => fetchRSS(s.url, s.source)));
+    const results = await fetchInBatches(RSS_SOURCES, 3, 600);
+    const succeeded = results.filter(r => r.status === 'fulfilled').length;
+
     allNews = results
       .filter(r => r.status === 'fulfilled')
       .flatMap(r => r.value)
       .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-    if (!allNews.length) throw new Error('No items');
-    renderNews();
+    // Log failures for debugging
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        console.warn(`[News] ${RSS_SOURCES[i].source} failed:`, r.reason?.message);
+      }
+    });
+
+    if (allNews.length > 0) {
+      console.log(`[News] Loaded ${allNews.length} articles from ${succeeded}/${RSS_SOURCES.length} sources`);
+      renderNews();
+    } else {
+      throw new Error('No items from any source');
+    }
   } catch(e) {
+    console.warn('[News] All sources failed, using placeholders:', e.message);
     // Fallback to curated placeholder news
     allNews = getPlaceholderNews();
     renderNews();
@@ -1535,14 +1641,12 @@ let xLoaded = false;
 
 async function fetchNitterFeed(handle, instance) {
   const url = `${instance}/${handle}/rss`;
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-  const data = await res.json();
-  if (!data.contents || data.contents.includes('<error>') || data.contents.length < 200) {
+  const xmlText = await fetchViaProxy(url, 8000);
+  if (!xmlText || xmlText.includes('<error>') || xmlText.length < 200) {
     throw new Error('Empty or error response');
   }
   const parser = new DOMParser();
-  const xml = parser.parseFromString(data.contents, 'text/xml');
+  const xml = parser.parseFromString(xmlText, 'text/xml');
   const items = [...xml.querySelectorAll('item')].slice(0, 8);
   if (!items.length) throw new Error('No items');
   return items;

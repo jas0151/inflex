@@ -56,9 +56,20 @@ function getDb() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
+        display_name TEXT DEFAULT '',
+        role TEXT DEFAULT 'admin',
         created_at TEXT DEFAULT (datetime('now'))
       );
     `);
+
+    // Migration: add new columns to admin_users if they don't exist
+    const adminCols = db.prepare("PRAGMA table_info(admin_users)").all().map(c => c.name);
+    if (!adminCols.includes('display_name')) {
+      db.exec("ALTER TABLE admin_users ADD COLUMN display_name TEXT DEFAULT ''");
+    }
+    if (!adminCols.includes('role')) {
+      db.exec("ALTER TABLE admin_users ADD COLUMN role TEXT DEFAULT 'admin'");
+    }
 
     // Admin sessions table
     db.exec(`

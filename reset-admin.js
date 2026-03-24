@@ -57,7 +57,7 @@ async function main() {
   } else {
     console.log('\n  Inflex Admin Reset Tool');
     console.log('  ──────────────────────\n');
-    username = await ask('  New admin username: ');
+    username = await ask('  New admin email: ');
     password = await ask('  New admin password: ', true);
     const confirm = await ask('  Confirm password:   ', true);
 
@@ -67,8 +67,8 @@ async function main() {
     }
   }
 
-  if (!username || username.length < 2) {
-    console.error('\n  Error: Username must be at least 2 characters.\n');
+  if (!username || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
+    console.error('\n  Error: Please enter a valid email address (e.g. you@gmail.com).\n');
     process.exit(1);
   }
   if (!password || password.length < 8) {
@@ -84,10 +84,11 @@ async function main() {
   db.exec('DELETE FROM admin_users');
 
   // Create new admin
-  db.prepare('INSERT INTO admin_users (username, password_hash) VALUES (?, ?)').run(username, hash);
+  const displayName = username.split('@')[0];
+  db.prepare('INSERT INTO admin_users (username, password_hash, display_name, role) VALUES (?, ?, ?, ?)').run(username.toLowerCase(), hash, displayName, 'owner');
 
   console.log('\n  Admin account reset successfully.');
-  console.log(`  Username: ${username}`);
+  console.log(`  Email: ${username}`);
   console.log('  Password: ********');
   console.log('\n  You can now log in at /login.html\n');
   process.exit(0);

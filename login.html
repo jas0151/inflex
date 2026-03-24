@@ -438,9 +438,9 @@
 
       <form id="loginForm" onsubmit="handleLogin(event)" autocomplete="on">
         <div class="login-field">
-          <label for="username">Username</label>
+          <label for="username">Email</label>
           <div class="input-wrap">
-            <input type="text" id="username" name="username" autocomplete="username" required placeholder="Enter username">
+            <input type="email" id="username" name="username" autocomplete="username" required placeholder="you@gmail.com">
           </div>
         </div>
 
@@ -621,7 +621,14 @@ async function handleLogin(e) {
   const password = document.getElementById('password').value;
 
   if (!username || !password) {
-    showError('Username and password are required');
+    showError('Email and password are required');
+    resetBtn();
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(username)) {
+    showError('Please enter a valid email address');
     resetBtn();
     return;
   }
@@ -644,7 +651,7 @@ async function handleLogin(e) {
       const setupRes = await fetch('/api/auth/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, displayName: username.split('@')[0] })
       });
 
       if (!setupRes.ok) {
@@ -677,6 +684,7 @@ async function handleLogin(e) {
     // Store credentials
     localStorage.setItem('inflex-admin-token', loginData.token);
     localStorage.setItem('inflex-admin-user', loginData.username);
+    localStorage.setItem('inflex-admin-display', loginData.displayName || loginData.username.split('@')[0]);
 
     // Remember me
     const rememberEl = document.getElementById('rememberMe');
