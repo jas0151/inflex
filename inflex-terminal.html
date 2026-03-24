@@ -1421,6 +1421,51 @@ async function fetchInBatches(sources, batchSize = 3, delayMs = 600) {
   return results;
 }
 
+// Interleave articles from different sources so no single source dominates.
+// Groups articles by source, sorts each group by date, then round-robins
+// through sources (picking the most recent remaining article from each source
+// in each round). Within each round, sources are ordered by their next
+// article's recency so the feed still feels chronological.
+function diversifyNews(articles) {
+  if (!articles.length) return articles;
+
+  // Group by source, sort each group newest-first
+  const bySource = {};
+  for (const item of articles) {
+    (bySource[item.source] ||= []).push(item);
+  }
+  const sources = Object.keys(bySource);
+  for (const src of sources) {
+    bySource[src].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  }
+
+  // Cap per source: at most N articles per source so one prolific feed
+  // doesn't take all slots even in later rounds
+  const maxPerSource = Math.max(5, Math.ceil(60 / sources.length));
+  for (const src of sources) {
+    bySource[src] = bySource[src].slice(0, maxPerSource);
+  }
+
+  // Round-robin interleave
+  const result = [];
+  let remaining = true;
+  while (remaining) {
+    // Collect the next article from each source that still has items
+    const round = [];
+    for (const src of sources) {
+      if (bySource[src].length > 0) {
+        round.push(bySource[src].shift());
+      }
+    }
+    if (round.length === 0) { remaining = false; break; }
+    // Sort this round by date so the interleave still trends recent→old
+    round.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    result.push(...round);
+  }
+
+  return result;
+}
+
 async function loadNews() {
   const feedEl = document.getElementById('newsFeed');
   feedEl.innerHTML = '<div class="loading"><span class="spinner"></span>Fetching latest news...</div>';
@@ -1428,10 +1473,11 @@ async function loadNews() {
     const results = await fetchInBatches(RSS_SOURCES, 3, 600);
     const succeeded = results.filter(r => r.status === 'fulfilled').length;
 
-    allNews = results
-      .filter(r => r.status === 'fulfilled')
-      .flatMap(r => r.value)
-      .sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    allNews = diversifyNews(
+      results
+        .filter(r => r.status === 'fulfilled')
+        .flatMap(r => r.value)
+    );
 
     // Log failures for debugging
     results.forEach((r, i) => {
