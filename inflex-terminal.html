@@ -1421,49 +1421,126 @@ async function fetchInBatches(sources, batchSize = 3, delayMs = 600) {
   return results;
 }
 
-// Interleave articles from different sources so no single source dominates.
-// Groups articles by source, sorts each group by date, then round-robins
-// through sources (picking the most recent remaining article from each source
-// in each round). Within each round, sources are ordered by their next
-// article's recency so the feed still feels chronological.
+// Smart feed mixing: chronological order + source diversity + dedup.
+//
+// Strategy:
+//   1. Sort all articles newest-first (primary axis)
+//   2. Deduplicate exact titles & near-duplicate headlines (Jaccard >0.6)
+//   3. Cap articles per source so no single feed hogs the list
+//   4. Space out same-source articles: no more than 1 from the same source
+//      within any sliding window of N positions (N = active source count)
+//      This guarantees every source gets fair screen time.
+
 function diversifyNews(articles) {
   if (!articles.length) return articles;
 
-  // Group by source, sort each group newest-first
-  const bySource = {};
-  for (const item of articles) {
-    (bySource[item.source] ||= []).push(item);
-  }
-  const sources = Object.keys(bySource);
-  for (const src of sources) {
-    bySource[src].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  const now = Date.now();
+
+  // ── Enrich with timestamps and word sets ──
+  const enriched = articles.map(item => ({
+    item,
+    ts: new Date(item.pubDate).getTime() || now,
+    words: new Set(
+      item.title.toLowerCase().replace(/[^\w\s]/g, '')
+        .split(/\s+/).filter(w => w.length > 3)
+    ),
+  }));
+
+  // Sort newest-first
+  enriched.sort((a, b) => b.ts - a.ts);
+
+  // ── Deduplicate exact titles ──
+  const seenTitles = new Set();
+  let list = enriched.filter(e => {
+    const key = e.item.title.toLowerCase().trim();
+    if (seenTitles.has(key)) return false;
+    seenTitles.add(key);
+    return true;
+  });
+
+  // ── Deduplicate near-similar headlines (Jaccard > 0.6) ──
+  function similarity(a, b) {
+    if (!a.size || !b.size) return 0;
+    let overlap = 0;
+    for (const w of a) { if (b.has(w)) overlap++; }
+    return overlap / (a.size + b.size - overlap);
   }
 
-  // Cap per source: at most N articles per source so one prolific feed
-  // doesn't take all slots even in later rounds
-  const maxPerSource = Math.max(5, Math.ceil(60 / sources.length));
-  for (const src of sources) {
-    bySource[src] = bySource[src].slice(0, maxPerSource);
+  const kept = [];
+  for (const entry of list) {
+    let isDupe = false;
+    for (const prev of kept) {
+      if (similarity(entry.words, prev.words) > 0.6) { isDupe = true; break; }
+    }
+    if (!isDupe) kept.push(entry);
   }
+  list = kept;
 
-  // Round-robin interleave
-  const result = [];
-  let remaining = true;
-  while (remaining) {
-    // Collect the next article from each source that still has items
-    const round = [];
-    for (const src of sources) {
-      if (bySource[src].length > 0) {
-        round.push(bySource[src].shift());
+  // ── Cap per source: keep the most recent N from each ──
+  const allSources = new Set(list.map(e => e.item.source));
+  const totalSources = allSources.size;
+  const maxPerSource = Math.max(5, Math.ceil(60 / totalSources));
+  const srcCounts = {};
+  list = list.filter(e => {
+    const c = srcCounts[e.item.source] || 0;
+    if (c >= maxPerSource) return false;
+    srcCounts[e.item.source] = c + 1;
+    return true;
+  });
+
+  // ── Promote high-impact articles: within the same 30-min band, ──
+  // ── move high-impact items before low-impact ones              ──
+  const BAND_MS = 30 * 60 * 1000;
+  for (let i = 1; i < list.length; i++) {
+    if (list[i].item.impact === 'high' && list[i - 1].item.impact === 'low') {
+      const timeDiff = list[i - 1].ts - list[i].ts;
+      if (timeDiff >= 0 && timeDiff < BAND_MS) {
+        [list[i - 1], list[i]] = [list[i], list[i - 1]];
       }
     }
-    if (round.length === 0) { remaining = false; break; }
-    // Sort this round by date so the interleave still trends recent→old
-    round.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-    result.push(...round);
   }
 
-  return result;
+  // ── Space out same-source articles ──
+  // Rule: within any sliding window of size `spacing`, no source appears
+  // more than once. If it would, push the article down to the next valid slot.
+  const spacing = Math.max(3, Math.min(totalSources, 6));
+  const output = [];
+  const deferred = []; // articles pushed down for later insertion
+
+  function recentSources(count) {
+    const recent = [];
+    for (let i = output.length - 1; i >= 0 && recent.length < count; i--) {
+      recent.push(output[i].item.source);
+    }
+    return recent;
+  }
+
+  for (const entry of list) {
+    const recent = recentSources(spacing - 1);
+    if (!recent.includes(entry.item.source)) {
+      output.push(entry);
+      // Try to flush deferred items
+      let flushed = true;
+      while (flushed && deferred.length) {
+        flushed = false;
+        for (let d = 0; d < deferred.length; d++) {
+          const r = recentSources(spacing - 1);
+          if (!r.includes(deferred[d].item.source)) {
+            output.push(deferred[d]);
+            deferred.splice(d, 1);
+            flushed = true;
+            break;
+          }
+        }
+      }
+    } else {
+      deferred.push(entry);
+    }
+  }
+  // Append any remaining deferred articles at the end
+  for (const d of deferred) output.push(d);
+
+  return output.map(e => e.item);
 }
 
 async function loadNews() {
