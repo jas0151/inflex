@@ -29,10 +29,59 @@ async function initDb() {
       read_time TEXT DEFAULT '',
       is_featured BOOLEAN DEFAULT FALSE,
       published BOOLEAN DEFAULT TRUE,
+      views INTEGER DEFAULT 0,
+      scheduled_at TIMESTAMP DEFAULT NULL,
+      meta_description TEXT DEFAULT '',
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
   `;
+  // Migration: add new columns safely
+  try { await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS views INTEGER DEFAULT 0`; } catch(e) {}
+  try { await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMP DEFAULT NULL`; } catch(e) {}
+  try { await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS meta_description TEXT DEFAULT ''`; } catch(e) {}
+
+  // Admin users table
+  await sql`
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id SERIAL PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `;
+
+  // Admin sessions table
+  await sql`
+    CREATE TABLE IF NOT EXISTS admin_sessions (
+      id SERIAL PRIMARY KEY,
+      token TEXT NOT NULL UNIQUE,
+      user_id INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `;
+
+  // Subscribers table
+  await sql`
+    CREATE TABLE IF NOT EXISTS subscribers (
+      id SERIAL PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      name TEXT DEFAULT '',
+      is_active BOOLEAN DEFAULT TRUE,
+      subscribed_at TIMESTAMP DEFAULT NOW()
+    );
+  `;
+
+  // Login attempts table
+  await sql`
+    CREATE TABLE IF NOT EXISTS login_attempts (
+      id SERIAL PRIMARY KEY,
+      ip_address TEXT NOT NULL,
+      attempted_at TIMESTAMP DEFAULT NOW()
+    );
+  `;
+
   initialized = true;
 }
 

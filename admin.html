@@ -30,6 +30,316 @@
     min-height: 100vh;
   }
 
+  /* ── Dashboard cards ── */
+  .dashboard { padding: 24px; }
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .dash-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dash-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--blue));
+    opacity: 0.5;
+  }
+  .dash-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .dash-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .dash-card-sub { font-size: 12px; color: var(--text2); }
+  .dash-card-sub .up { color: var(--green); }
+
+  .dash-recent {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .dash-recent h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .dash-recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .dash-recent-item:last-child { border-bottom: none; }
+  .dash-recent-item:hover { color: var(--accent); }
+  .dash-recent-title { font-weight: 500; flex: 1; margin-right: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-recent-date { color: var(--text2); font-size: 11px; flex-shrink: 0; }
+
+  /* ── Bulk action bar ── */
+  .bulk-bar {
+    display: none;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    gap: 6px;
+    align-items: center;
+  }
+  .bulk-bar.show { display: flex; }
+  .bulk-bar-count {
+    font-size: 12px;
+    color: var(--text2);
+    margin-right: auto;
+  }
+  .bulk-bar button {
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .bulk-publish { background: var(--green); color: #000; }
+  .bulk-unpublish { background: var(--yellow); color: #000; }
+  .bulk-delete { background: #f85149; color: #fff; }
+  .bulk-bar button:hover { opacity: 0.85; }
+
+  /* ── Checkbox in article items ── */
+  .article-item { position: relative; padding-left: 36px !important; }
+  .article-item .item-check {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .select-all-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .select-all-wrap input { accent-color: var(--accent); cursor: pointer; }
+
+  /* ── Confirm modal ── */
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 400;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirm-overlay.show { display: flex; }
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    max-width: 400px;
+    width: 90%;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .confirm-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .confirm-box p { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ── Preview modal ── */
+  .preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 350;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-overlay.show { display: flex; }
+  .preview-frame {
+    background: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 740px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalIn 0.25s ease;
+  }
+  .preview-close {
+    position: sticky;
+    top: 0;
+    float: right;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    margin: 12px;
+    z-index: 10;
+  }
+  .preview-content {
+    padding: 48px 48px 40px;
+    color: #292929;
+    font-family: 'Barlow', sans-serif;
+    font-size: 18px;
+    line-height: 1.85;
+  }
+  .preview-content h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.12;
+    color: #1a1a18;
+    margin-bottom: 12px;
+  }
+  .preview-content .preview-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .preview-content .preview-excerpt {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .preview-content .preview-meta {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e8e4df;
+  }
+  .preview-content h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin: 40px 0 14px; color: #1a1a18; }
+  .preview-content h3 { font-size: 20px; font-weight: 700; margin: 32px 0 10px; color: #1a1a18; }
+  .preview-content p { margin-bottom: 20px; }
+  .preview-content blockquote { border-left: 3px solid #c8001a; padding: 4px 0 4px 24px; margin: 28px 0; color: #555; font-style: italic; }
+  .preview-content pre { background: #1a1a18; color: #e6e6e6; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 28px 0; font-size: 14px; }
+  .preview-content pre code { background: none; padding: 0; color: #e6e6e6; }
+  .preview-content code { background: #f3f0ec; padding: 2px 7px; border-radius: 3px; font-size: 0.88em; color: #c8001a; }
+  .preview-content img { max-width: 100%; display: block; margin: 24px 0; border-radius: 4px; }
+  .preview-content a { color: #c8001a; text-decoration: underline; }
+  .preview-content strong { font-weight: 700; color: #1a1a18; }
+
+  /* ── Toast stack ── */
+  .toast-stack {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    z-index: 500;
+  }
+  .toast-item {
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+    min-width: 200px;
+    max-width: 400px;
+    animation: toastIn 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .toast-item.success { background: #238636; }
+  .toast-item.error { background: #da3633; }
+  .toast-item.warning { background: #9e6a03; }
+  .toast-item.info { background: #1f6feb; }
+  .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.4);
+    animation: toastProgress 3s linear forwards;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastProgress { from { width: 100%; } to { width: 0%; } }
+
+  /* ── Autosave indicator ── */
+  .autosave-status {
+    font-size: 11px;
+    color: var(--text2);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .autosave-status.show { opacity: 1; }
+
+  /* ── SEO section ── */
+  .seo-toggle {
+    font-size: 12px;
+    color: var(--text2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    margin: 8px 0;
+  }
+  .seo-toggle:hover { color: var(--text); }
+  .seo-section { display: none; }
+  .seo-section.show { display: block; }
+  .meta-char-count { font-size: 11px; color: var(--text2); text-align: right; margin-top: 4px; }
+  .meta-char-count.warn { color: var(--yellow); }
+  .meta-char-count.over { color: #f85149; }
+
+  /* ── Responsive dashboard ── */
+  @media (max-width: 900px) {
+    .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 500px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+  }
+
   /* ── Top bar ── */
   .topbar {
     display: flex;
@@ -295,6 +605,107 @@
   .tb.active { color: var(--accent); background: var(--surface2); }
   .tb-bold { font-weight: 800; }
   .tb-italic { font-style: italic; }
+  .tb-strike { text-decoration: line-through; }
+  .tb-code { font-family: monospace; font-size: 12px; }
+
+  /* ── Slash command menu ── */
+  .slash-menu {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    min-width: 220px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 200;
+    display: none;
+  }
+  .slash-menu.show { display: block; }
+  .slash-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.1s;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .slash-item:hover, .slash-item.selected { background: var(--surface2); }
+  .slash-item-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border-radius: 5px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .slash-item-label { font-weight: 600; }
+  .slash-item-hint { font-size: 11px; color: var(--text2); }
+
+  /* ── Shortcut help overlay ── */
+  .shortcut-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .shortcut-overlay.show { display: flex; }
+  .shortcut-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    max-width: 520px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .shortcut-panel h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .shortcut-group { margin-bottom: 18px; }
+  .shortcut-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .shortcut-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .shortcut-keys {
+    display: flex;
+    gap: 4px;
+  }
+  .kbd {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--text2);
+  }
 
   /* ── WYSIWYG editor ── */
   .editor-content {
@@ -544,7 +955,7 @@
   }
 </style>
 </head>
-<body>
+<body style="visibility:hidden;">
 
 <div class="topbar">
   <div class="topbar-left">
@@ -554,6 +965,9 @@
   <div class="topbar-links">
     <a href="/">View Site</a>
     <a href="/inflex-terminal.html">Terminal</a>
+    <a href="#" onclick="showSubscribers()" id="subscribersLink">Subscribers</a>
+    <a href="#" onclick="showAccountPanel()">Account</a>
+    <a href="#" onclick="logout()" style="color:var(--accent);">Logout</a>
   </div>
 </div>
 
@@ -573,8 +987,17 @@
         <button class="filter-btn" data-filter="featured" onclick="setFilter('featured',this)">Featured</button>
       </div>
     </div>
+    <div class="select-all-wrap" id="selectAllWrap" style="display:none;" onclick="toggleSelectAll()">
+      <input type="checkbox" id="selectAllCheck"> Select all
+    </div>
     <div class="article-list" id="articleList">
       <div style="padding:20px;color:var(--text2);text-align:center;font-size:13px;">Loading...</div>
+    </div>
+    <div class="bulk-bar" id="bulkBar">
+      <span class="bulk-bar-count" id="bulkCount">0 selected</span>
+      <button class="bulk-publish" onclick="bulkAction('publish')">Publish</button>
+      <button class="bulk-unpublish" onclick="bulkAction('unpublish')">Unpublish</button>
+      <button class="bulk-delete" onclick="bulkAction('delete')">Delete</button>
     </div>
   </div>
 
@@ -582,9 +1005,19 @@
   <div class="editor-wrap">
     <div class="editor-area" id="editorArea">
       <div class="editor-empty" id="editorEmpty">
-        <div class="editor-empty-icon">&#9998;</div>
-        <div class="editor-empty-text">Select an article or create a new one</div>
-        <div class="editor-empty-hint">Use the "+ New Article" button to get started</div>
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard" style="width:100%;text-align:left;">
+          <div class="dashboard-grid">
+            <div class="dash-card"><div class="dash-card-label">Total Articles</div><div class="dash-card-value" id="dashTotal">—</div><div class="dash-card-sub" id="dashBreakdown">Loading...</div></div>
+            <div class="dash-card"><div class="dash-card-label">Total Views</div><div class="dash-card-value" id="dashViews">—</div><div class="dash-card-sub">All time</div></div>
+            <div class="dash-card"><div class="dash-card-label">This Week</div><div class="dash-card-value" id="dashWeek">—</div><div class="dash-card-sub">New articles</div></div>
+            <div class="dash-card"><div class="dash-card-label">Featured</div><div class="dash-card-value" id="dashFeatured">—</div><div class="dash-card-sub" id="dashScheduled">—</div></div>
+          </div>
+          <div class="dash-recent">
+            <h3>Recent Activity</h3>
+            <div id="dashRecentList">Loading...</div>
+          </div>
+        </div>
       </div>
 
       <div class="editor-inner" id="editorForm" style="display:none">
@@ -637,16 +1070,21 @@
               <button type="button" class="tb" onmousedown="execFmt(event,'insertOrderedList')" title="Numbered list">1. List</button>
               <button type="button" class="tb" onmousedown="execBlock(event,'blockquote')" title="Quote">&#10077;</button>
               <div class="toolbar-sep"></div>
-              <button type="button" class="tb" onmousedown="execLink(event)" title="Insert link">Link</button>
+              <button type="button" class="tb tb-strike" onmousedown="execFmt(event,'strikeThrough')" title="Strikethrough (Ctrl+Shift+X)">S</button>
+              <button type="button" class="tb tb-code" onmousedown="execInlineCode(event)" title="Inline code (Ctrl+E)">&lt;/&gt;</button>
+              <div class="toolbar-sep"></div>
+              <button type="button" class="tb" onmousedown="execLink(event)" title="Insert link (Ctrl+K)">Link</button>
               <button type="button" class="tb" onmousedown="execInsertImage(event)" title="Upload image">&#128247; Image</button>
               <button type="button" class="tb" onmousedown="execHR(event)" title="Horizontal rule">&#8212;</button>
+              <div class="toolbar-sep"></div>
+              <button type="button" class="tb" onmousedown="showShortcuts(event)" title="Keyboard shortcuts (Ctrl+/)">&#9000;</button>
               <input type="file" id="contentImageInput" accept="image/*" style="display:none" multiple>
             </div>
             <!-- WYSIWYG contenteditable editor -->
             <div class="editor-content" id="articleContent" contenteditable="true" data-placeholder="Start writing your article... &#10;&#10;Just type naturally. Use the toolbar or keyboard shortcuts (Ctrl+B for bold, Ctrl+I for italic). Drag & drop or paste images directly."></div>
             <div class="content-footer">
-              <div class="word-count" id="wordCount">0 words · 0 min read</div>
-              <div class="content-hint">Paste or drop images anywhere · Ctrl+B bold · Ctrl+I italic</div>
+              <div style="display:flex;gap:12px;align-items:center;"><div class="word-count" id="wordCount">0 words · 0 min read</div><div class="autosave-status" id="autosaveStatus">Draft auto-saved</div></div>
+              <div class="content-hint">Type / for commands · Markdown shortcuts (## , > , - ) · Ctrl+/ for all shortcuts</div>
             </div>
           </div>
 
@@ -661,10 +1099,31 @@
             </div>
           </div>
 
+          <!-- Schedule -->
+          <div class="form-group" style="margin-top:8px;">
+            <label>Schedule publish</label>
+            <input type="datetime-local" id="articleSchedule" class="form-input" style="max-width:280px;">
+          </div>
+
+          <!-- SEO -->
+          <button type="button" class="seo-toggle" onclick="document.getElementById('seoSection').classList.toggle('show');this.querySelector('span').textContent=this.querySelector('span').textContent==='+'?'-':'+'">
+            <span>+</span> SEO Settings
+          </button>
+          <div class="seo-section" id="seoSection">
+            <div class="form-group">
+              <label>Meta Description</label>
+              <textarea id="articleMetaDesc" class="form-input" rows="2" placeholder="SEO meta description (150-160 characters recommended)" style="resize:vertical;" oninput="updateMetaCount()"></textarea>
+              <div class="meta-char-count" id="metaCharCount">0 / 160</div>
+            </div>
+          </div>
+
           <div class="editor-actions">
             <button type="submit" class="btn btn-primary" id="saveBtn">Publish Article</button>
             <button type="button" class="btn btn-outline" id="previewSiteBtn" style="display:none" onclick="openPreview()">View on site</button>
+            <button type="button" class="btn btn-outline" id="previewModalBtn" style="display:none" onclick="showArticlePreview()">Preview</button>
             <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+            <button type="button" class="btn btn-secondary" id="duplicateBtn" onclick="duplicateArticle()" style="display:none">Duplicate</button>
+            <button type="button" class="btn btn-secondary" id="exportBtn" onclick="exportArticle()" style="display:none">Export</button>
             <button type="button" class="btn btn-danger" id="deleteBtn" onclick="deleteArticle()" style="display:none">Delete</button>
           </div>
         </form>
@@ -673,22 +1132,131 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- Slash command menu -->
+<div class="slash-menu" id="slashMenu">
+  <div class="slash-item" data-cmd="h2" onclick="slashExec('h2')"><div class="slash-item-icon">H2</div><div><div class="slash-item-label">Heading 2</div><div class="slash-item-hint">Large section heading</div></div></div>
+  <div class="slash-item" data-cmd="h3" onclick="slashExec('h3')"><div class="slash-item-icon">H3</div><div><div class="slash-item-label">Heading 3</div><div class="slash-item-hint">Smaller section heading</div></div></div>
+  <div class="slash-item" data-cmd="quote" onclick="slashExec('quote')"><div class="slash-item-icon">&#10077;</div><div><div class="slash-item-label">Blockquote</div><div class="slash-item-hint">Highlighted quote</div></div></div>
+  <div class="slash-item" data-cmd="bullet" onclick="slashExec('bullet')"><div class="slash-item-icon">&#8226;</div><div><div class="slash-item-label">Bullet List</div><div class="slash-item-hint">Unordered list</div></div></div>
+  <div class="slash-item" data-cmd="numbered" onclick="slashExec('numbered')"><div class="slash-item-icon">1.</div><div><div class="slash-item-label">Numbered List</div><div class="slash-item-hint">Ordered list</div></div></div>
+  <div class="slash-item" data-cmd="code" onclick="slashExec('code')"><div class="slash-item-icon">&lt;/&gt;</div><div><div class="slash-item-label">Code Block</div><div class="slash-item-hint">Preformatted code</div></div></div>
+  <div class="slash-item" data-cmd="hr" onclick="slashExec('hr')"><div class="slash-item-icon">&#8212;</div><div><div class="slash-item-label">Divider</div><div class="slash-item-hint">Horizontal rule</div></div></div>
+  <div class="slash-item" data-cmd="image" onclick="slashExec('image')"><div class="slash-item-icon">&#128247;</div><div><div class="slash-item-label">Image</div><div class="slash-item-hint">Upload an image</div></div></div>
+</div>
+
+<!-- Shortcut help overlay -->
+<div class="shortcut-overlay" id="shortcutOverlay" onclick="if(event.target===this)closeShortcuts()">
+  <div class="shortcut-panel">
+    <h3>Keyboard Shortcuts</h3>
+    <div class="shortcut-group">
+      <div class="shortcut-group-title">Text Formatting</div>
+      <div class="shortcut-row"><span>Bold</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">B</span></div></div>
+      <div class="shortcut-row"><span>Italic</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">I</span></div></div>
+      <div class="shortcut-row"><span>Underline</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">U</span></div></div>
+      <div class="shortcut-row"><span>Strikethrough</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">Shift</span><span class="kbd">X</span></div></div>
+      <div class="shortcut-row"><span>Inline Code</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">E</span></div></div>
+      <div class="shortcut-row"><span>Insert Link</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">K</span></div></div>
+    </div>
+    <div class="shortcut-group">
+      <div class="shortcut-group-title">Blocks</div>
+      <div class="shortcut-row"><span>Heading 2</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">Alt</span><span class="kbd">2</span></div></div>
+      <div class="shortcut-row"><span>Heading 3</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">Alt</span><span class="kbd">3</span></div></div>
+      <div class="shortcut-row"><span>Paragraph</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">Alt</span><span class="kbd">0</span></div></div>
+      <div class="shortcut-row"><span>Blockquote</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">Shift</span><span class="kbd">.</span></div></div>
+    </div>
+    <div class="shortcut-group">
+      <div class="shortcut-group-title">Markdown Shortcuts (type at start of line)</div>
+      <div class="shortcut-row"><span>Heading 2</span><div class="shortcut-keys"><span class="kbd">## </span></div></div>
+      <div class="shortcut-row"><span>Heading 3</span><div class="shortcut-keys"><span class="kbd">### </span></div></div>
+      <div class="shortcut-row"><span>Bullet list</span><div class="shortcut-keys"><span class="kbd">- </span></div></div>
+      <div class="shortcut-row"><span>Numbered list</span><div class="shortcut-keys"><span class="kbd">1. </span></div></div>
+      <div class="shortcut-row"><span>Blockquote</span><div class="shortcut-keys"><span class="kbd">> </span></div></div>
+      <div class="shortcut-row"><span>Divider</span><div class="shortcut-keys"><span class="kbd">---</span></div></div>
+    </div>
+    <div class="shortcut-group">
+      <div class="shortcut-group-title">Application</div>
+      <div class="shortcut-row"><span>Save article</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">S</span></div></div>
+      <div class="shortcut-row"><span>New article</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">N</span></div></div>
+      <div class="shortcut-row"><span>Slash commands</span><div class="shortcut-keys"><span class="kbd">/</span></div></div>
+      <div class="shortcut-row"><span>This help</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="kbd">/</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="confirm-overlay" id="confirmOverlay" onclick="if(event.target===this)closeConfirm()">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMsg">This action cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmAction" onclick="confirmCallback()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal -->
+<div class="preview-overlay" id="previewOverlay" onclick="if(event.target===this)closePreview()">
+  <div class="preview-frame">
+    <button class="preview-close" onclick="closePreview()">&times;</button>
+    <div class="preview-content" id="previewContent"></div>
+  </div>
+</div>
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toastStack"></div>
 
 <script>
+// ── AUTH CHECK ──
+const adminToken = localStorage.getItem('inflex-admin-token');
+if (!adminToken) {
+  window.location.href = '/login.html';
+}
+
+function authHeaders(extra = {}) {
+  return { 'Authorization': 'Bearer ' + adminToken, ...extra };
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch('/api/auth/me', { headers: authHeaders() });
+    if (!res.ok) {
+      localStorage.removeItem('inflex-admin-token');
+      localStorage.removeItem('inflex-admin-user');
+      window.location.href = '/login.html';
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function logout() {
+  fetch('/api/auth/logout', { method: 'POST', headers: authHeaders() }).catch(() => {});
+  localStorage.removeItem('inflex-admin-token');
+  localStorage.removeItem('inflex-admin-user');
+  window.location.href = '/login.html';
+}
+
 let articles = [];
 let currentId = null;
 let currentFilter = 'all';
 let pendingCoverBase64 = null;
 let currentSlug = null;
+let selectedIds = new Set();
+let autosaveTimer = null;
+let _confirmResolve = null;
 
 // ── Load articles ──
 async function loadArticles() {
   try {
-    const res = await fetch('/api/articles/all');
+    const res = await fetch('/api/articles/all', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
     articles = await res.json();
     updateStats();
     renderList();
+    loadDashboard();
   } catch (e) {
     document.getElementById('articleList').innerHTML =
       '<div style="padding:20px;color:#f85149;text-align:center;font-size:13px;">Failed to load articles. Check database connection.</div>';
@@ -699,6 +1267,26 @@ function updateStats() {
   const pub = articles.filter(a => a.published).length;
   const drafts = articles.filter(a => !a.published).length;
   document.getElementById('articleStats').textContent = `${pub} published · ${drafts} drafts`;
+  document.getElementById('selectAllWrap').style.display = articles.length ? 'flex' : 'none';
+}
+
+// ── Dashboard ──
+async function loadDashboard() {
+  try {
+    const res = await fetch('/api/articles/stats', { headers: authHeaders() });
+    const s = await res.json();
+    document.getElementById('dashTotal').textContent = s.total;
+    document.getElementById('dashBreakdown').innerHTML = `<span class="up">${s.published} published</span> · ${s.drafts} drafts`;
+    document.getElementById('dashViews').textContent = s.totalViews.toLocaleString();
+    document.getElementById('dashWeek').textContent = s.thisWeek;
+    document.getElementById('dashFeatured').textContent = s.featured;
+    document.getElementById('dashScheduled').textContent = s.scheduled > 0 ? `${s.scheduled} scheduled` : 'No scheduled';
+    if (s.recentArticles && s.recentArticles.length) {
+      document.getElementById('dashRecentList').innerHTML = s.recentArticles.map(a =>
+        `<div class="dash-recent-item" onclick="editArticle(${a.id})"><span class="dash-recent-title">${escHtml(a.title)}</span><span class="badge ${a.published ? 'badge-published' : 'badge-draft'}" style="margin-right:8px;font-size:10px;">${a.published ? 'Live' : 'Draft'}</span><span class="dash-recent-date">${formatDate(a.created_at)}</span></div>`
+      ).join('');
+    }
+  } catch(e) {}
 }
 
 function setFilter(f, btn) {
@@ -727,15 +1315,18 @@ function renderList() {
   }
 
   list.innerHTML = filtered.map(a => `
-    <div class="article-item ${a.id === currentId ? 'active' : ''}" onclick="editArticle(${a.id})">
+    <div class="article-item ${a.id === currentId ? 'active' : ''}" onclick="if(!event.target.classList.contains('item-check'))editArticle(${a.id})">
+      <input type="checkbox" class="item-check" ${selectedIds.has(a.id)?'checked':''} onclick="event.stopPropagation();toggleSelect(${a.id},this.checked)">
       <div class="article-item-title">${escHtml(a.title)}</div>
       <div class="article-item-meta">
         <span>${formatDate(a.created_at)}</span>
         ${a.is_featured ? '<span class="badge badge-featured">Featured</span>' : ''}
+        ${a.scheduled_at && new Date(a.scheduled_at) > new Date() ? '<span class="badge" style="background:rgba(88,166,255,0.15);color:var(--blue);">Scheduled</span>' : ''}
         <span class="badge ${a.published ? 'badge-published' : 'badge-draft'}">${a.published ? 'Live' : 'Draft'}</span>
       </div>
     </div>
   `).join('');
+  updateBulkBar();
 }
 
 // ── New article ──
@@ -746,6 +1337,9 @@ function newArticle() {
   showEditor();
   document.getElementById('deleteBtn').style.display = 'none';
   document.getElementById('previewSiteBtn').style.display = 'none';
+  document.getElementById('previewModalBtn').style.display = 'none';
+  document.getElementById('duplicateBtn').style.display = 'none';
+  document.getElementById('exportBtn').style.display = 'none';
   document.getElementById('saveBtn').textContent = 'Publish Article';
   document.getElementById('articleId').value = '';
   document.getElementById('articleTitle').value = '';
@@ -755,9 +1349,13 @@ function newArticle() {
   document.getElementById('articleContent').innerHTML = '';
   document.getElementById('articleFeatured').checked = false;
   document.getElementById('articlePublished').checked = true;
+  document.getElementById('articleSchedule').value = '';
+  document.getElementById('articleMetaDesc').value = '';
+  updateMetaCount();
   clearCover();
   updateWordCount();
   renderList();
+  startAutosave();
   document.getElementById('articleTitle').focus();
 }
 
@@ -771,6 +1369,9 @@ function editArticle(id) {
   showEditor();
   document.getElementById('deleteBtn').style.display = 'inline-block';
   document.getElementById('previewSiteBtn').style.display = 'inline-block';
+  document.getElementById('previewModalBtn').style.display = 'inline-block';
+  document.getElementById('duplicateBtn').style.display = 'inline-block';
+  document.getElementById('exportBtn').style.display = 'inline-block';
   document.getElementById('saveBtn').textContent = 'Save Changes';
   document.getElementById('articleId').value = a.id;
   document.getElementById('articleTitle').value = a.title;
@@ -780,6 +1381,9 @@ function editArticle(id) {
   document.getElementById('articleContent').innerHTML = a.content || '';
   document.getElementById('articleFeatured').checked = !!a.is_featured;
   document.getElementById('articlePublished').checked = a.published !== false;
+  document.getElementById('articleSchedule').value = a.scheduled_at ? a.scheduled_at.replace(' ', 'T').substring(0,16) : '';
+  document.getElementById('articleMetaDesc').value = a.meta_description || '';
+  updateMetaCount();
 
   if (a.cover_image) {
     document.getElementById('coverPreview').src = a.cover_image;
@@ -792,6 +1396,7 @@ function editArticle(id) {
   document.getElementById('coverInput').value = '';
   updateWordCount();
   renderList();
+  startAutosave();
 }
 
 function showEditor() {
@@ -822,7 +1427,9 @@ async function saveArticle(e) {
     excerpt: document.getElementById('articleExcerpt').value,
     content: contentHtml,
     is_featured: document.getElementById('articleFeatured').checked,
-    published: document.getElementById('articlePublished').checked
+    published: document.getElementById('articlePublished').checked,
+    scheduled_at: document.getElementById('articleSchedule').value || '',
+    meta_description: document.getElementById('articleMetaDesc').value || ''
   };
 
   if (pendingCoverBase64) {
@@ -836,7 +1443,7 @@ async function saveArticle(e) {
   try {
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(body)
     });
     if (!res.ok) {
@@ -847,6 +1454,7 @@ async function saveArticle(e) {
     const saved = await res.json();
     currentId = saved.id;
     currentSlug = saved.slug;
+    clearAutosave();
     showToast(id ? 'Article saved!' : 'Article published!');
     await loadArticles();
     editArticle(saved.id);
@@ -862,13 +1470,15 @@ async function saveArticle(e) {
 async function deleteArticle() {
   const id = document.getElementById('articleId').value;
   if (!id) return;
-  if (!confirm('Delete this article permanently?')) return;
+  const confirmed = await showConfirmModal('Delete Article', 'Delete this article permanently? This cannot be undone.');
+  if (!confirmed) return;
 
   try {
-    const res = await fetch(`/api/articles/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/articles/${id}`, { method: 'DELETE', headers: authHeaders() });
     if (!res.ok) throw new Error('Delete failed');
     currentId = null;
     currentSlug = null;
+    clearAutosave();
     showToast('Article deleted');
     cancelEdit();
     await loadArticles();
@@ -940,9 +1550,29 @@ function execBlock(e, tag) {
   updateWordCount();
 }
 
+function execInlineCode(e) {
+  e.preventDefault();
+  editor.focus();
+  const sel = window.getSelection();
+  if (sel.rangeCount && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const text = range.toString();
+    const code = document.createElement('code');
+    code.textContent = text;
+    range.deleteContents();
+    range.insertNode(code);
+    range.setStartAfter(code);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
 function execLink(e) {
   e.preventDefault();
-  const url = prompt('Enter URL:');
+  const sel = window.getSelection();
+  const selectedText = sel.rangeCount ? sel.toString() : '';
+  const url = prompt('Enter URL:', selectedText.startsWith('http') ? selectedText : 'https://');
   if (!url) return;
   editor.focus();
   document.execCommand('createLink', false, url);
@@ -953,6 +1583,292 @@ function execHR(e) {
   editor.focus();
   document.execCommand('insertHorizontalRule', false, null);
   updateWordCount();
+}
+
+// ── Toolbar state tracking ──
+function updateToolbarState() {
+  document.querySelectorAll('.toolbar .tb').forEach(btn => btn.classList.remove('active'));
+  const checks = { bold:'tb-bold', italic:'tb-italic', underline:'[title*="Underline"]', strikeThrough:'tb-strike' };
+  for (const [cmd, cls] of Object.entries(checks)) {
+    if (document.queryCommandState(cmd)) {
+      const sel = cls.startsWith('[') ? document.querySelector(`.toolbar .tb${cls}`) : document.querySelector(`.toolbar .${cls}`);
+      if (sel) sel.classList.add('active');
+    }
+  }
+  // Block state
+  const block = document.queryCommandValue('formatBlock');
+  if (block) {
+    const tag = block.replace(/[<>]/g,'').toLowerCase();
+    document.querySelectorAll('.toolbar .tb').forEach(btn => {
+      if (btn.textContent.trim() === tag.toUpperCase()) btn.classList.add('active');
+    });
+  }
+}
+
+editor.addEventListener('keyup', updateToolbarState);
+editor.addEventListener('mouseup', updateToolbarState);
+
+// ── Slash commands ──
+let slashMenuVisible = false;
+let slashSelectedIndex = 0;
+const slashItems = () => document.querySelectorAll('#slashMenu .slash-item:not([style*="display:none"])');
+
+function showSlashMenu() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+  const menu = document.getElementById('slashMenu');
+  // Reset filter
+  document.querySelectorAll('#slashMenu .slash-item').forEach(el => el.style.display = '');
+  menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+  menu.style.left = (rect.left + window.scrollX) + 'px';
+  menu.classList.add('show');
+  slashMenuVisible = true;
+  slashSelectedIndex = 0;
+  updateSlashSelection();
+}
+
+function hideSlashMenu() {
+  document.getElementById('slashMenu').classList.remove('show');
+  slashMenuVisible = false;
+}
+
+function updateSlashSelection() {
+  const items = slashItems();
+  items.forEach((el, i) => el.classList.toggle('selected', i === slashSelectedIndex));
+}
+
+function filterSlashMenu(query) {
+  const q = query.toLowerCase();
+  let visibleCount = 0;
+  document.querySelectorAll('#slashMenu .slash-item').forEach(el => {
+    const label = el.querySelector('.slash-item-label').textContent.toLowerCase();
+    const match = label.includes(q);
+    el.style.display = match ? '' : 'none';
+    if (match) visibleCount++;
+  });
+  if (visibleCount === 0) { hideSlashMenu(); return; }
+  slashSelectedIndex = 0;
+  updateSlashSelection();
+}
+
+function slashExec(cmd) {
+  hideSlashMenu();
+  // Remove the slash text from editor
+  deleteSlashText();
+  editor.focus();
+  switch(cmd) {
+    case 'h2': document.execCommand('formatBlock', false, '<h2>'); break;
+    case 'h3': document.execCommand('formatBlock', false, '<h3>'); break;
+    case 'quote': document.execCommand('formatBlock', false, '<blockquote>'); break;
+    case 'bullet': document.execCommand('insertUnorderedList', false, null); break;
+    case 'numbered': document.execCommand('insertOrderedList', false, null); break;
+    case 'hr': document.execCommand('insertHorizontalRule', false, null); break;
+    case 'image': document.getElementById('contentImageInput').click(); break;
+    case 'code':
+      const pre = document.createElement('pre');
+      const code = document.createElement('code');
+      code.textContent = ' ';
+      pre.appendChild(code);
+      const sel = window.getSelection();
+      if (sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        range.insertNode(pre);
+        // Add paragraph after
+        const p = document.createElement('p');
+        p.innerHTML = '<br>';
+        pre.after(p);
+        range.setStart(code, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      break;
+  }
+  updateWordCount();
+}
+
+function deleteSlashText() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const node = sel.anchorNode;
+  if (!node || node.nodeType !== 3) return;
+  const text = node.textContent;
+  const slashPos = text.lastIndexOf('/');
+  if (slashPos >= 0) {
+    node.textContent = text.substring(0, slashPos);
+  }
+}
+
+// ── Markdown-style shortcuts ──
+function handleMarkdownShortcuts(e) {
+  if (e.key !== ' ' && e.key !== 'Enter') return;
+
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const node = sel.anchorNode;
+  if (!node || node.nodeType !== 3) return;
+  const text = node.textContent;
+  const offset = sel.anchorOffset;
+  const lineText = text.substring(0, offset);
+
+  // Only trigger on Space for inline shortcuts
+  if (e.key === ' ') {
+    if (lineText === '##') {
+      e.preventDefault();
+      node.textContent = text.substring(offset);
+      document.execCommand('formatBlock', false, '<h2>');
+      return;
+    }
+    if (lineText === '###') {
+      e.preventDefault();
+      node.textContent = text.substring(offset);
+      document.execCommand('formatBlock', false, '<h3>');
+      return;
+    }
+    if (lineText === '>') {
+      e.preventDefault();
+      node.textContent = text.substring(offset);
+      document.execCommand('formatBlock', false, '<blockquote>');
+      return;
+    }
+    if (lineText === '-' || lineText === '*') {
+      e.preventDefault();
+      node.textContent = text.substring(offset);
+      document.execCommand('insertUnorderedList', false, null);
+      return;
+    }
+    if (lineText === '1.') {
+      e.preventDefault();
+      node.textContent = text.substring(offset);
+      document.execCommand('insertOrderedList', false, null);
+      return;
+    }
+  }
+
+  // --- for horizontal rule on Enter
+  if (e.key === 'Enter' && lineText.trim() === '---') {
+    e.preventDefault();
+    node.textContent = '';
+    document.execCommand('insertHorizontalRule', false, null);
+  }
+}
+
+editor.addEventListener('keydown', (e) => {
+  handleMarkdownShortcuts(e);
+
+  // Slash command handling
+  if (slashMenuVisible) {
+    const items = slashItems();
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      slashSelectedIndex = (slashSelectedIndex + 1) % items.length;
+      updateSlashSelection();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      slashSelectedIndex = (slashSelectedIndex - 1 + items.length) % items.length;
+      updateSlashSelection();
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const selected = items[slashSelectedIndex];
+      if (selected) selected.click();
+      return;
+    }
+    if (e.key === 'Escape') {
+      hideSlashMenu();
+      return;
+    }
+  }
+
+  // Ctrl+E for inline code
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+    execInlineCode(e);
+    return;
+  }
+
+  // Ctrl+K for link
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    execLink(e);
+    return;
+  }
+
+  // Ctrl+Shift+X for strikethrough
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'X') {
+    e.preventDefault();
+    document.execCommand('strikeThrough', false, null);
+    return;
+  }
+
+  // Ctrl+Shift+. for blockquote
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '>') {
+    e.preventDefault();
+    document.execCommand('formatBlock', false, '<blockquote>');
+    return;
+  }
+
+  // Ctrl+Alt+2 for H2
+  if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === '2') {
+    e.preventDefault();
+    document.execCommand('formatBlock', false, '<h2>');
+    return;
+  }
+
+  // Ctrl+Alt+3 for H3
+  if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === '3') {
+    e.preventDefault();
+    document.execCommand('formatBlock', false, '<h3>');
+    return;
+  }
+
+  // Ctrl+Alt+0 for paragraph
+  if ((e.ctrlKey || e.metaKey) && e.altKey && e.key === '0') {
+    e.preventDefault();
+    document.execCommand('formatBlock', false, '<p>');
+    return;
+  }
+});
+
+// Slash command input tracking
+editor.addEventListener('input', () => {
+  updateWordCount();
+  const sel = window.getSelection();
+  if (!sel.rangeCount) { hideSlashMenu(); return; }
+  const node = sel.anchorNode;
+  if (!node || node.nodeType !== 3) { hideSlashMenu(); return; }
+  const text = node.textContent;
+  const offset = sel.anchorOffset;
+  const before = text.substring(0, offset);
+  const slashMatch = before.match(/\/([a-z]*)$/i);
+  if (slashMatch) {
+    if (!slashMenuVisible) showSlashMenu();
+    if (slashMatch[1]) filterSlashMenu(slashMatch[1]);
+    else {
+      document.querySelectorAll('#slashMenu .slash-item').forEach(el => el.style.display = '');
+      slashSelectedIndex = 0;
+      updateSlashSelection();
+    }
+  } else {
+    hideSlashMenu();
+  }
+});
+
+// Close slash menu on click outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#slashMenu') && !e.target.closest('.editor-content')) hideSlashMenu();
+});
+
+// ── Shortcut help overlay ──
+function showShortcuts(e) {
+  if (e) e.preventDefault();
+  document.getElementById('shortcutOverlay').classList.add('show');
+}
+function closeShortcuts() {
+  document.getElementById('shortcutOverlay').classList.remove('show');
 }
 
 function execInsertImage(e) {
@@ -1079,8 +1995,6 @@ function updateWordCount() {
   document.getElementById('wordCount').textContent = `${words} words · ${mins} min read`;
 }
 
-editor.addEventListener('input', updateWordCount);
-
 // ── Helpers ──
 function escHtml(text) {
   const d = document.createElement('div');
@@ -1094,12 +2008,168 @@ function formatDate(str) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function showToast(msg, isError) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = isError ? '#f85149' : 'var(--green)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(msg, typeOrIsError) {
+  let type = 'success';
+  if (typeOrIsError === true) type = 'error';
+  else if (typeof typeOrIsError === 'string') type = typeOrIsError;
+
+  const stack = document.getElementById('toastStack');
+  const toast = document.createElement('div');
+  toast.className = `toast-item ${type}`;
+  toast.innerHTML = `${escHtml(msg)}<div class="toast-progress"></div>`;
+  stack.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ── Meta description character counter ──
+function updateMetaCount() {
+  const len = (document.getElementById('articleMetaDesc').value || '').length;
+  const el = document.getElementById('metaCharCount');
+  el.textContent = `${len} / 160`;
+  el.className = 'meta-char-count' + (len > 160 ? ' over' : len > 140 ? ' warn' : '');
+}
+
+// ── Confirm modal ──
+function showConfirmModal(title, msg) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOverlay').classList.add('show');
+  return new Promise(resolve => { _confirmResolve = resolve; });
+}
+function confirmCallback() {
+  closeConfirm();
+  if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('show');
+  if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+}
+
+// ── Bulk operations ──
+function toggleSelect(id, checked) {
+  if (checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateBulkBar();
+  document.getElementById('selectAllCheck').checked = selectedIds.size === articles.length;
+}
+function toggleSelectAll() {
+  const check = document.getElementById('selectAllCheck');
+  check.checked = !check.checked;
+  if (check.checked) {
+    articles.forEach(a => selectedIds.add(a.id));
+  } else {
+    selectedIds.clear();
+  }
+  renderList();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  if (selectedIds.size > 0) {
+    bar.classList.add('show');
+    document.getElementById('bulkCount').textContent = `${selectedIds.size} selected`;
+  } else {
+    bar.classList.remove('show');
+  }
+}
+async function bulkAction(action) {
+  const count = selectedIds.size;
+  if (!count) return;
+  const confirmed = await showConfirmModal(
+    `Bulk ${action}`,
+    `${action === 'delete' ? 'Permanently delete' : action === 'publish' ? 'Publish' : 'Unpublish'} ${count} article${count > 1 ? 's' : ''}?`
+  );
+  if (!confirmed) return;
+  try {
+    const res = await fetch('/api/articles/bulk', {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action, ids: [...selectedIds] })
+    });
+    if (!res.ok) throw new Error('Failed');
+    selectedIds.clear();
+    document.getElementById('selectAllCheck').checked = false;
+    showToast(`Bulk ${action} completed for ${count} articles`);
+    await loadArticles();
+    if (action === 'delete' && currentId && ![...articles.map(a=>a.id)].includes(currentId)) cancelEdit();
+  } catch(e) {
+    showToast(`Bulk ${action} failed`, true);
+  }
+}
+
+// ── Duplicate article ──
+async function duplicateArticle() {
+  const id = document.getElementById('articleId').value;
+  if (!id) return;
+  try {
+    const res = await fetch(`/api/articles/${id}/duplicate`, { method: 'POST', headers: authHeaders() });
+    if (!res.ok) throw new Error('Failed');
+    const dup = await res.json();
+    showToast('Article duplicated as draft');
+    await loadArticles();
+    editArticle(dup.id);
+  } catch(e) {
+    showToast('Failed to duplicate', true);
+  }
+}
+
+// ── Article preview modal ──
+function showArticlePreview() {
+  const title = document.getElementById('articleTitle').value;
+  const tag = document.getElementById('articleTag').value;
+  const excerpt = document.getElementById('articleExcerpt').value;
+  const author = document.getElementById('articleAuthor').value;
+  const content = getEditorContent();
+
+  let html = '';
+  if (tag) html += `<div class="preview-tag">${escHtml(tag)}</div>`;
+  html += `<h1>${escHtml(title)}</h1>`;
+  if (excerpt) html += `<div class="preview-excerpt">${escHtml(excerpt)}</div>`;
+  html += `<div class="preview-meta">${escHtml(author || 'Inflex Research')} · ${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}</div>`;
+  html += content;
+
+  document.getElementById('previewContent').innerHTML = html;
+  document.getElementById('previewOverlay').classList.add('show');
+}
+function closePreview() {
+  document.getElementById('previewOverlay').classList.remove('show');
+}
+
+// ── Export article ──
+function exportArticle() {
+  const a = articles.find(x => x.id === currentId);
+  if (!a) return;
+  const json = JSON.stringify(a, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${a.slug || 'article'}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast('Article exported as JSON');
+}
+
+// ── Autosave ──
+function startAutosave() {
+  if (autosaveTimer) clearInterval(autosaveTimer);
+  autosaveTimer = setInterval(() => {
+    const key = `inflex_autosave_${currentId || 'new'}`;
+    const data = {
+      title: document.getElementById('articleTitle').value,
+      tag: document.getElementById('articleTag').value,
+      author: document.getElementById('articleAuthor').value,
+      excerpt: document.getElementById('articleExcerpt').value,
+      content: editor.innerHTML,
+      timestamp: Date.now()
+    };
+    if (data.title || data.content) {
+      localStorage.setItem(key, JSON.stringify(data));
+      const status = document.getElementById('autosaveStatus');
+      if (status) { status.classList.add('show'); setTimeout(() => status.classList.remove('show'), 2000); }
+    }
+  }, 30000);
+}
+function clearAutosave() {
+  localStorage.removeItem(`inflex_autosave_${currentId || 'new'}`);
 }
 
 // ── Keyboard shortcuts ──
@@ -1113,6 +2183,17 @@ document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
     e.preventDefault();
     newArticle();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+    e.preventDefault();
+    const overlay = document.getElementById('shortcutOverlay');
+    overlay.classList.contains('show') ? closeShortcuts() : showShortcuts();
+  }
+  if (e.key === 'Escape') {
+    closeShortcuts();
+    hideSlashMenu();
+    closeConfirm();
+    closePreview();
   }
 });
 
@@ -1147,8 +2228,456 @@ coverArea.addEventListener('drop', (e) => {
   }
 });
 
+// ── SUBSCRIBER MANAGEMENT ──
+async function showSubscribers() {
+  try {
+    const res = await fetch('/api/subscribers', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    if (!res.ok) throw new Error('Failed to load subscribers');
+    const data = await res.json();
+
+    saveEditorState();
+    const editorWrap = document.querySelector('.editor-wrap');
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.style.display = 'none';
+
+    editorWrap.innerHTML = `
+      <div style="padding:32px;max-width:800px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+          <div>
+            <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);margin-bottom:4px;">Subscribers</h2>
+            <p style="font-size:13px;color:var(--text2);">${data.active} active of ${data.total} total</p>
+          </div>
+          <button onclick="restoreArticleView()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back to Articles</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--border);">
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Email</th>
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Name</th>
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Status</th>
+              <th style="text-align:left;padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);">Date</th>
+              <th style="padding:10px 12px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.subscribers.length === 0 ? '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text2);font-family:\'Barlow\',sans-serif;">No subscribers yet</td></tr>' :
+              data.subscribers.map(s => `
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:10px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);">${escHtml(s.email)}</td>
+                  <td style="padding:10px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text2);">${escHtml(s.name || '—')}</td>
+                  <td style="padding:10px 12px;">
+                    <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;${s.is_active ? 'color:var(--green);background:rgba(63,185,80,0.1);' : 'color:var(--accent);background:rgba(200,0,26,0.1);'}">${s.is_active ? 'Active' : 'Inactive'}</span>
+                  </td>
+                  <td style="padding:10px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--text2);">${formatDate(s.subscribed_at)}</td>
+                  <td style="padding:10px 12px;">
+                    <button onclick="removeSubscriber(${s.id})" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--text2);padding:4px 10px;cursor:pointer;" title="Remove">&times;</button>
+                  </td>
+                </tr>
+              `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (e) {
+    showToast('Failed to load subscribers', true);
+  }
+}
+
+async function removeSubscriber(id) {
+  const confirmed = await showConfirmModal('Remove Subscriber', 'Are you sure you want to permanently remove this subscriber?');
+  if (!confirmed) return;
+  try {
+    const res = await fetch(`/api/subscribers/admin/${id}`, { method: 'DELETE', headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    if (!res.ok) throw new Error('Failed');
+    showToast('Subscriber removed');
+    showSubscribers();
+  } catch (e) {
+    showToast('Failed to remove subscriber', true);
+  }
+}
+
+// ── ACCOUNT MANAGEMENT PANEL ──
+const _inputStyle = "font-family:'Barlow',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;border-radius:4px;";
+const _btnStyle = "font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--accent);color:#fff;border:none;padding:10px 18px;cursor:pointer;border-radius:4px;white-space:nowrap;";
+const _sectionLabel = "font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;";
+const _sectionBox = "background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;";
+
+function showAccountPanel() {
+  saveEditorState();
+  const editorWrap = document.querySelector('.editor-wrap');
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.style.display = 'none';
+  const currentEmail = localStorage.getItem('inflex-admin-user') || '';
+  const currentDisplay = localStorage.getItem('inflex-admin-display') || currentEmail.split('@')[0];
+  const initial = (currentDisplay || currentEmail || 'A').charAt(0).toUpperCase();
+
+  editorWrap.innerHTML = `
+    <div style="padding:32px;max-width:620px;overflow-y:auto;max-height:calc(100vh - 56px);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);">Account Settings</h2>
+        <button onclick="restoreArticleView()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;cursor:pointer;">&larr; Back</button>
+      </div>
+
+      <!-- Profile Info -->
+      <div style="${_sectionBox}">
+        <div style="${_sectionLabel}">Your Profile</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;">${initial}</div>
+          <div>
+            <div style="font-size:16px;font-weight:600;color:var(--text);" id="accountDisplayName">${currentDisplay}</div>
+            <div style="font-size:12px;color:var(--text2);" id="accountEmail">${currentEmail}</div>
+          </div>
+        </div>
+        <div id="displayNameMsg" style="font-size:13px;margin-bottom:6px;min-height:16px;"></div>
+        <form onsubmit="handleChangeDisplayName(event)" style="display:flex;gap:8px;">
+          <input type="text" id="newDisplayName" placeholder="Display name" value="${currentDisplay}" style="flex:1;${_inputStyle}">
+          <button type="submit" id="displayNameBtn" style="${_btnStyle}">Save</button>
+        </form>
+      </div>
+
+      <!-- Change Email -->
+      <div style="${_sectionBox}">
+        <div style="${_sectionLabel}">Change Email</div>
+        <div id="emailMsg" style="font-size:13px;margin-bottom:8px;min-height:18px;"></div>
+        <form onsubmit="handleChangeEmail(event)" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="email" id="newEmail" placeholder="newemail@gmail.com" required style="flex:1;min-width:180px;${_inputStyle}">
+          <input type="password" id="emailPassword" placeholder="Confirm password" required style="flex:1;min-width:140px;${_inputStyle}">
+          <button type="submit" id="emailBtn" style="${_btnStyle}">Update</button>
+        </form>
+      </div>
+
+      <!-- Change Password -->
+      <div style="${_sectionBox}">
+        <div style="${_sectionLabel}">Change Password</div>
+        <div id="pwChangeError" style="font-size:13px;color:var(--accent);margin-bottom:8px;min-height:18px;"></div>
+        <div id="pwChangeSuccess" style="font-size:13px;color:var(--green);margin-bottom:8px;min-height:18px;"></div>
+        <form onsubmit="handleChangePassword(event)">
+          <div style="margin-bottom:12px;">
+            <input type="password" id="pwCurrent" required placeholder="Current password" style="width:100%;${_inputStyle}">
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <input type="password" id="pwNew" required minlength="8" placeholder="New password (min 8 chars)" style="flex:1;min-width:150px;${_inputStyle}">
+            <input type="password" id="pwConfirm" required minlength="8" placeholder="Confirm new password" style="flex:1;min-width:150px;${_inputStyle}">
+          </div>
+          <button type="submit" id="pwChangeBtn" style="${_btnStyle}">Update Password</button>
+        </form>
+      </div>
+
+      <!-- Manage Admins -->
+      <div style="${_sectionBox}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="${_sectionLabel}margin-bottom:0;">Admin Accounts</div>
+          <button onclick="showAddAdminForm()" id="addAdminToggle" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--green);color:#000;border:none;padding:5px 10px;cursor:pointer;border-radius:3px;">+ Add Admin</button>
+        </div>
+        <div id="addAdminForm" style="display:none;margin-bottom:14px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
+          <div id="addAdminMsg" style="font-size:13px;margin-bottom:8px;min-height:16px;"></div>
+          <form onsubmit="handleAddAdmin(event)">
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+              <input type="email" id="adminNewEmail" placeholder="admin@gmail.com" required style="flex:1;min-width:180px;${_inputStyle}">
+              <input type="text" id="adminNewName" placeholder="Display name" style="flex:1;min-width:120px;${_inputStyle}">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input type="password" id="adminNewPassword" placeholder="Password (min 8 chars)" required minlength="8" style="flex:1;min-width:180px;${_inputStyle}">
+              <button type="submit" id="addAdminBtn" style="${_btnStyle}">Create Admin</button>
+              <button type="button" onclick="document.getElementById('addAdminForm').style.display='none'" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--text2);padding:10px 14px;cursor:pointer;border-radius:4px;">Cancel</button>
+            </div>
+          </form>
+        </div>
+        <div id="adminsContainer" style="font-size:13px;color:var(--text2);">Loading...</div>
+      </div>
+
+      <!-- Active Sessions -->
+      <div style="${_sectionBox}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="${_sectionLabel}margin-bottom:0;">Active Sessions</div>
+          <button onclick="revokeAllSessions()" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;color:var(--accent);border:1px solid var(--accent);padding:5px 10px;cursor:pointer;border-radius:3px;">Revoke All Others</button>
+        </div>
+        <div id="sessionsContainer" style="font-size:13px;color:var(--text2);">Loading...</div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div style="background:var(--surface);border:1px solid #f8514933;border-radius:8px;padding:20px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f85149;margin-bottom:12px;">Danger Zone</div>
+        <button onclick="logout()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:#f85149;color:#fff;border:none;padding:10px 18px;cursor:pointer;border-radius:4px;">Log Out of All Devices & Sign Out</button>
+      </div>
+    </div>
+  `;
+
+  loadSessions();
+  loadAdmins();
+}
+
+function showAddAdminForm() {
+  document.getElementById('addAdminForm').style.display = 'block';
+  document.getElementById('adminNewEmail').focus();
+}
+
+// ── Admin list ──
+async function loadAdmins() {
+  const container = document.getElementById('adminsContainer');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/auth/admins', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!data.admins || !data.admins.length) {
+      container.textContent = 'No admins found';
+      return;
+    }
+    const currentEmail = localStorage.getItem('inflex-admin-user') || '';
+    container.innerHTML = data.admins.map(a => {
+      const isMe = a.username === currentEmail;
+      const name = a.display_name || a.username.split('@')[0];
+      const initial = name.charAt(0).toUpperCase();
+      const roleBadge = a.role === 'owner'
+        ? '<span style="font-size:9px;letter-spacing:0.06em;text-transform:uppercase;background:var(--yellow);color:#000;padding:2px 6px;border-radius:3px;font-weight:700;">Owner</span>'
+        : '<span style="font-size:9px;letter-spacing:0.06em;text-transform:uppercase;background:var(--blue);color:#000;padding:2px 6px;border-radius:3px;font-weight:700;">Admin</span>';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${isMe ? 'var(--accent)' : 'var(--surface3)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${isMe ? '#fff' : 'var(--text2)'};">${initial}</div>
+          <div>
+            <div style="font-size:13px;color:var(--text);font-weight:${isMe ? '600' : '400'};">${name} ${isMe ? '(you)' : ''} ${roleBadge}</div>
+            <div style="font-size:11px;color:var(--text2);">${a.username}</div>
+          </div>
+        </div>
+        ${isMe ? '' : '<button onclick="removeAdmin(' + a.id + ',\'' + a.username.replace(/'/g, "\\'") + '\')" style="font-size:10px;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid #f85149;color:#f85149;padding:3px 8px;border-radius:3px;cursor:pointer;">Remove</button>'}
+      </div>`;
+    }).join('');
+  } catch (e) {
+    container.textContent = 'Failed to load admins';
+  }
+}
+
+async function handleAddAdmin(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('addAdminMsg');
+  const btn = document.getElementById('addAdminBtn');
+  msgEl.textContent = '';
+  msgEl.style.color = '';
+
+  const email = document.getElementById('adminNewEmail').value.trim();
+  const displayName = document.getElementById('adminNewName').value.trim();
+  const password = document.getElementById('adminNewPassword').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  try {
+    const res = await fetch('/api/auth/admins', {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email, password, displayName })
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) {
+      msgEl.style.color = 'var(--accent)';
+      msgEl.textContent = data.error;
+    } else {
+      msgEl.style.color = 'var(--green)';
+      msgEl.textContent = 'Admin created: ' + email;
+      document.getElementById('adminNewEmail').value = '';
+      document.getElementById('adminNewName').value = '';
+      document.getElementById('adminNewPassword').value = '';
+      loadAdmins();
+      showToast('Admin account created');
+    }
+  } catch (err) {
+    msgEl.style.color = 'var(--accent)';
+    msgEl.textContent = 'Connection error';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Create Admin';
+}
+
+async function removeAdmin(id, email) {
+  if (!confirm('Remove admin ' + email + '? They will lose access immediately.')) return;
+  try {
+    const res = await fetch('/api/auth/admins/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message);
+      loadAdmins();
+    } else {
+      showToast(data.error || 'Failed to remove admin', true);
+    }
+  } catch (e) { showToast('Connection error', true); }
+}
+
+// ── Sessions ──
+async function loadSessions() {
+  const container = document.getElementById('sessionsContainer');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/auth/sessions', { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!data.sessions || data.sessions.length === 0) {
+      container.textContent = 'No active sessions';
+      return;
+    }
+    container.innerHTML = data.sessions.map(s => {
+      const created = new Date(s.created_at + 'Z');
+      const expires = new Date(s.expires_at + 'Z');
+      const timeAgo = getTimeAgo(created);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:13px;color:var(--text);">${s.is_current ? '<strong>Current session</strong>' : 'Session #' + s.id}</div>
+          <div style="font-size:11px;color:var(--text2);">Created ${timeAgo} &middot; Expires ${expires.toLocaleDateString()}</div>
+        </div>
+        ${s.is_current ? '<span style="font-size:10px;letter-spacing:0.06em;text-transform:uppercase;background:var(--green);color:#000;padding:3px 8px;border-radius:3px;font-weight:700;">Active</span>' : '<button onclick="revokeSession(' + s.id + ')" style="font-size:10px;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--text2);padding:3px 8px;border-radius:3px;cursor:pointer;">Revoke</button>'}
+      </div>`;
+    }).join('');
+  } catch (e) {
+    container.textContent = 'Failed to load sessions';
+  }
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+  if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+  return Math.floor(seconds / 86400) + 'd ago';
+}
+
+async function revokeSession(id) {
+  try {
+    const res = await fetch('/api/auth/sessions/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    if (res.ok) { showToast('Session revoked'); loadSessions(); }
+  } catch (e) { showToast('Failed to revoke session', true); }
+}
+
+async function revokeAllSessions() {
+  try {
+    const res = await fetch('/api/auth/sessions/revoke-all', { method: 'POST', headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (res.ok) { showToast(data.message); loadSessions(); }
+  } catch (e) { showToast('Failed to revoke sessions', true); }
+}
+
+// ── Profile updates ──
+async function handleChangeDisplayName(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('displayNameMsg');
+  const btn = document.getElementById('displayNameBtn');
+  const name = document.getElementById('newDisplayName').value.trim();
+  msgEl.textContent = '';
+
+  if (!name) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Name cannot be empty'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const res = await fetch('/api/auth/change-display-name', {
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ displayName: name })
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (res.ok) {
+      msgEl.style.color = 'var(--green)'; msgEl.textContent = 'Display name updated';
+      localStorage.setItem('inflex-admin-display', name);
+      const el = document.getElementById('accountDisplayName');
+      if (el) el.textContent = name;
+    } else { msgEl.style.color = 'var(--accent)'; msgEl.textContent = data.error; }
+  } catch (err) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Connection error'; }
+  btn.disabled = false; btn.textContent = 'Save';
+}
+
+async function handleChangeEmail(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('emailMsg');
+  const btn = document.getElementById('emailBtn');
+  msgEl.textContent = ''; msgEl.style.color = '';
+
+  const newEmail = document.getElementById('newEmail').value.trim();
+  const password = document.getElementById('emailPassword').value;
+
+  btn.disabled = true; btn.textContent = 'Updating...';
+  try {
+    const res = await fetch('/api/auth/change-email', {
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ newEmail, password })
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = data.error; }
+    else {
+      msgEl.style.color = 'var(--green)'; msgEl.textContent = 'Email updated to ' + data.username;
+      localStorage.setItem('inflex-admin-user', data.username);
+      const el = document.getElementById('accountEmail');
+      if (el) el.textContent = data.username;
+      document.getElementById('newEmail').value = '';
+      document.getElementById('emailPassword').value = '';
+    }
+  } catch (err) { msgEl.style.color = 'var(--accent)'; msgEl.textContent = 'Connection error'; }
+  btn.disabled = false; btn.textContent = 'Update';
+}
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const errorEl = document.getElementById('pwChangeError');
+  const successEl = document.getElementById('pwChangeSuccess');
+  const btn = document.getElementById('pwChangeBtn');
+  errorEl.textContent = ''; successEl.textContent = '';
+
+  const currentPassword = document.getElementById('pwCurrent').value;
+  const newPassword = document.getElementById('pwNew').value;
+  const confirm = document.getElementById('pwConfirm').value;
+
+  if (newPassword !== confirm) { errorEl.textContent = 'New passwords do not match'; return; }
+  if (newPassword.length < 8) { errorEl.textContent = 'Password must be at least 8 characters'; return; }
+
+  btn.disabled = true; btn.textContent = 'Updating...';
+  try {
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) { errorEl.textContent = data.error; }
+    else {
+      successEl.textContent = 'Password changed successfully';
+      document.getElementById('pwCurrent').value = '';
+      document.getElementById('pwNew').value = '';
+      document.getElementById('pwConfirm').value = '';
+    }
+  } catch (err) { errorEl.textContent = 'Connection error'; }
+  btn.disabled = false; btn.textContent = 'Update Password';
+}
+
+// ── Restore article view (from subscribers/password panels) ──
+let _savedEditorHTML = null;
+
+function saveEditorState() {
+  const editorWrap = document.querySelector('.editor-wrap');
+  if (editorWrap) _savedEditorHTML = editorWrap.innerHTML;
+}
+
+function restoreArticleView() {
+  const sidebar = document.querySelector('.sidebar');
+  const editorWrap = document.querySelector('.editor-wrap');
+  sidebar.style.display = '';
+  if (_savedEditorHTML) {
+    editorWrap.innerHTML = _savedEditorHTML;
+    _savedEditorHTML = null;
+  }
+  loadArticles();
+}
+
 // ── Init ──
-loadArticles();
+checkAuth().then(ok => {
+  if (ok) {
+    document.body.style.visibility = 'visible';
+    loadArticles();
+  }
+});
 </script>
 </body>
 </html>

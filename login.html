@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inflex Trades — Admin Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="inflex.css">
+<script>if(localStorage.getItem('inflex-dark-mode')==='true')document.documentElement.classList.add('dark');</script>
+<style>
+  .login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated grid background */
+  .login-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, var(--rule-light) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, var(--rule-light) 60px);
+    opacity: 0.4;
+  }
+  html.dark .login-bg { opacity: 0.15; }
+
+  /* Floating accent line decoration */
+  .login-accent-line {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100vh;
+    background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+    opacity: 0.1;
+    z-index: 0;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+    animation: cardAppear 0.5s ease both;
+  }
+  html.dark .login-card { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); }
+
+  @keyframes cardAppear {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .login-header {
+    padding: 40px 36px 0;
+    text-align: center;
+  }
+  .login-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+  .login-logo span { color: var(--accent); }
+  .login-subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: all 0.3s ease;
+  }
+
+  .login-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--accent);
+    margin: 24px auto 0;
+  }
+
+  .login-body {
+    padding: 32px 36px 36px;
+  }
+
+  .login-field {
+    margin-bottom: 22px;
+    position: relative;
+  }
+  .login-field label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 8px;
+    transition: color 0.2s;
+  }
+  .login-field:focus-within label { color: var(--ink); }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap input {
+    width: 100%;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-wrap input:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.05);
+  }
+  html.dark .input-wrap input {
+    background: var(--paper2);
+    border-color: var(--rule);
+    color: var(--ink);
+  }
+  html.dark .input-wrap input:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(230, 237, 243, 0.05);
+  }
+
+  /* Password visibility toggle */
+  .pw-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted2);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+  .pw-toggle:hover { color: var(--ink); }
+  .pw-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+  .input-wrap input[type="password"] + .pw-toggle .icon-eye-off { display: none; }
+  .input-wrap input[type="text"] + .pw-toggle .icon-eye { display: none; }
+
+  .login-btn {
+    width: 100%;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 16px 28px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .login-btn:hover:not(:disabled) { background: var(--accent); }
+  .login-btn:active:not(:disabled) { transform: scale(0.99); }
+  .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* Button loading spinner */
+  .btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Error message */
+  .login-error {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 20px;
+    min-height: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    opacity: 0;
+  }
+  .login-error.visible {
+    min-height: 20px;
+    max-height: 60px;
+    padding: 10px 16px;
+    background: rgba(200, 0, 26, 0.06);
+    border: 1px solid rgba(200, 0, 26, 0.15);
+    opacity: 1;
+  }
+  html.dark .login-error.visible {
+    background: rgba(200, 0, 26, 0.1);
+    border-color: rgba(200, 0, 26, 0.25);
+  }
+
+  /* Shake animation on error */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 50%, 90% { transform: translateX(-4px); }
+    30%, 70% { transform: translateX(4px); }
+  }
+  .login-card.shake { animation: shake 0.4s ease; }
+
+  /* Setup notice */
+  .setup-notice {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: rgba(200, 0, 26, 0.04);
+    border: 1px solid rgba(200, 0, 26, 0.12);
+    line-height: 1.5;
+  }
+
+  /* Confirm field slide animation */
+  .slide-field {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    margin-bottom: 0;
+  }
+  .slide-field.open {
+    max-height: 100px;
+    opacity: 1;
+    margin-bottom: 22px;
+  }
+
+  /* Password strength */
+  .password-strength {
+    height: 3px;
+    margin-top: 8px;
+    background: var(--rule);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+  }
+  .password-strength.open { max-height: 10px; }
+
+  .password-strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s, background 0.3s;
+  }
+  .pw-weak { width: 33%; background: var(--accent); }
+  .pw-medium { width: 66%; background: #f59e0b; }
+  .pw-strong { width: 100%; background: #16a34a; }
+
+  .pw-hint {
+    font-family: 'Barlow', sans-serif;
+    font-size: 11px;
+    color: var(--muted2);
+    margin-top: 6px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .pw-hint.open {
+    max-height: 30px;
+    opacity: 1;
+  }
+
+  /* Remember me */
+  .login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .remember-me input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--ink);
+    cursor: pointer;
+  }
+  .remember-me span {
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  /* Footer */
+  .login-footer {
+    padding: 18px 36px;
+    border-top: 1px solid var(--rule);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .login-footer a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .login-footer a:hover { color: var(--ink); }
+  .login-footer a svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  /* Dark toggle */
+  .dark-toggle-login {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 10;
+  }
+
+  /* Version badge */
+  .login-version {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    opacity: 0.5;
+    z-index: 1;
+  }
+
+  /* Success state */
+  .login-success {
+    text-align: center;
+    padding: 40px 0;
+    animation: fadeUp 0.4s ease both;
+  }
+  .login-success .checkmark {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border: 2px solid #16a34a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-success .checkmark svg { width: 24px; height: 24px; stroke: #16a34a; fill: none; }
+  .login-success p {
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .login-page { padding: 24px 16px; }
+    .login-card { max-width: 100%; }
+    .login-header { padding: 32px 24px 0; }
+    .login-body { padding: 24px 24px 28px; }
+    .login-footer { padding: 16px 24px; }
+    .login-logo { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-bg"></div>
+<div class="login-accent-line"></div>
+
+<div class="dark-toggle-login">
+  <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+</div>
+
+<div class="login-page">
+  <div class="login-card" id="loginCard">
+    <div class="login-header">
+      <div class="login-logo">Inflex<span>.</span></div>
+      <div class="login-subtitle" id="loginSubtitle">Admin Dashboard</div>
+      <div class="login-divider"></div>
+    </div>
+    <div class="login-body" id="loginBody">
+      <div class="login-error" id="loginError"></div>
+
+      <!-- Setup notice -->
+      <div id="setupNotice" class="setup-notice" style="display:none;">
+        No admin account found. Create your first admin account below.
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" autocomplete="on">
+        <div class="login-field">
+          <label for="username">Email</label>
+          <div class="input-wrap">
+            <input type="email" id="username" name="username" autocomplete="username" required placeholder="you@gmail.com">
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="Enter password">
+            <button type="button" class="pw-toggle" onclick="togglePasswordVisibility('password')" tabindex="-1" title="Show password">
+              <svg class="icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <div class="password-strength" id="pwStrength">
+            <div class="password-strength-bar" id="pwStrengthBar"></div>
+          </div>
+          <div class="pw-hint" id="pwHint">Use 12+ chars with uppercase, numbers &amp; symbols for strong password</div>
+        </div>
+
+        <div class="slide-field" id="confirmField">
+          <div class="login-field" style="margin-bottom:0;">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" placeholder="Re-enter password">
+              <button type="button" class="pw-toggle" onclick="togglePasswordVisibility('confirmPassword')" tabindex="-1" title="Show password">
+                <svg class="icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-options" id="loginOptions">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe">
+            <span>Remember me</span>
+          </label>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+      </form>
+    </div>
+    <div class="login-footer">
+      <a href="/">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Inflex Trades
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="login-version">Inflex Admin v2.0</div>
+
+<script>
+let isSetupMode = false;
+
+// Check if already authenticated
+(async function checkExistingSession() {
+  const existingToken = localStorage.getItem('inflex-admin-token');
+  if (!existingToken) { checkSetup(); return; }
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + existingToken }
+    });
+    if (res.ok) {
+      window.location.href = '/admin.html';
+      return;
+    }
+    // Token invalid — clear stale data
+    localStorage.removeItem('inflex-admin-token');
+    localStorage.removeItem('inflex-admin-user');
+  } catch (e) { /* ignore network errors */ }
+  checkSetup();
+})();
+
+// Check if admin exists
+async function checkSetup() {
+  try {
+    const res = await fetch('/api/auth/check-setup');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.adminExists) {
+      enterSetupMode();
+    }
+  } catch (e) {
+    console.error('Setup check failed:', e);
+  }
+}
+
+function enterSetupMode() {
+  isSetupMode = true;
+  document.getElementById('setupNotice').style.display = 'block';
+  document.getElementById('confirmField').classList.add('open');
+  document.getElementById('loginBtn').textContent = 'Create Admin Account';
+  document.getElementById('loginSubtitle').textContent = 'Initial Setup';
+  document.getElementById('pwStrength').classList.add('open');
+  document.getElementById('pwHint').classList.add('open');
+  document.getElementById('password').autocomplete = 'new-password';
+  document.getElementById('password').placeholder = 'Create a password';
+  document.getElementById('loginOptions').style.display = 'none';
+}
+
+function exitSetupMode() {
+  isSetupMode = false;
+  document.getElementById('setupNotice').style.display = 'none';
+  document.getElementById('confirmField').classList.remove('open');
+  document.getElementById('pwStrength').classList.remove('open');
+  document.getElementById('pwHint').classList.remove('open');
+  document.getElementById('loginBtn').textContent = 'Sign In';
+  document.getElementById('loginSubtitle').textContent = 'Admin Dashboard';
+  document.getElementById('loginOptions').style.display = 'flex';
+}
+
+// Password visibility toggle
+function togglePasswordVisibility(inputId) {
+  const input = document.getElementById(inputId);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// Password strength indicator
+document.getElementById('password').addEventListener('input', function() {
+  if (!isSetupMode) return;
+  const bar = document.getElementById('pwStrengthBar');
+  const pw = this.value;
+  bar.className = 'password-strength-bar';
+  if (pw.length >= 12 && /[A-Z]/.test(pw) && /[0-9]/.test(pw) && /[^a-zA-Z0-9]/.test(pw)) {
+    bar.classList.add('pw-strong');
+  } else if (pw.length >= 8 && (/[A-Z]/.test(pw) || /[0-9]/.test(pw))) {
+    bar.classList.add('pw-medium');
+  } else if (pw.length >= 4) {
+    bar.classList.add('pw-weak');
+  }
+});
+
+function showError(msg) {
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = msg;
+  errorEl.classList.add('visible');
+  const card = document.getElementById('loginCard');
+  card.classList.remove('shake');
+  void card.offsetWidth;
+  card.classList.add('shake');
+}
+
+function clearError() {
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = '';
+  errorEl.classList.remove('visible');
+}
+
+function resetBtn() {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = false;
+  btn.textContent = isSetupMode ? 'Create Admin Account' : 'Sign In';
+}
+
+function showSuccess(message) {
+  const body = document.getElementById('loginBody');
+  body.innerHTML = `
+    <div class="login-success">
+      <div class="checkmark">
+        <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <p>${message}</p>
+    </div>
+  `;
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  clearError();
+  btn.disabled = true;
+  btn.innerHTML = isSetupMode
+    ? '<span class="btn-spinner"></span>Creating Account...'
+    : '<span class="btn-spinner"></span>Signing In...';
+
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+    showError('Email and password are required');
+    resetBtn();
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(username)) {
+    showError('Please enter a valid email address');
+    resetBtn();
+    return;
+  }
+
+  try {
+    // Setup flow: create admin account first
+    if (isSetupMode) {
+      const confirm = document.getElementById('confirmPassword').value;
+      if (password !== confirm) {
+        showError('Passwords do not match');
+        resetBtn();
+        return;
+      }
+      if (password.length < 8) {
+        showError('Password must be at least 8 characters');
+        resetBtn();
+        return;
+      }
+
+      const setupRes = await fetch('/api/auth/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, displayName: username.split('@')[0] })
+      });
+
+      if (!setupRes.ok) {
+        const setupData = await setupRes.json();
+        if (setupRes.status === 403) {
+          // Admin already exists — switch to login mode and continue
+          exitSetupMode();
+        } else {
+          showError(setupData.error || 'Setup failed');
+          resetBtn();
+          return;
+        }
+      }
+    }
+
+    // Login
+    const loginRes = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const loginData = await loginRes.json();
+
+    if (!loginRes.ok) {
+      showError(loginData.error || 'Login failed');
+      resetBtn();
+      return;
+    }
+
+    // Store credentials
+    localStorage.setItem('inflex-admin-token', loginData.token);
+    localStorage.setItem('inflex-admin-user', loginData.username);
+    localStorage.setItem('inflex-admin-display', loginData.displayName || loginData.username.split('@')[0]);
+
+    // Remember me
+    const rememberEl = document.getElementById('rememberMe');
+    if (rememberEl && rememberEl.checked) {
+      localStorage.setItem('inflex-remember-user', username);
+    } else {
+      localStorage.removeItem('inflex-remember-user');
+    }
+
+    // Success animation then redirect
+    showSuccess('Welcome, ' + loginData.username);
+    setTimeout(() => { window.location.href = '/admin.html'; }, 800);
+
+  } catch (err) {
+    showError('Connection error. Please try again.');
+    resetBtn();
+  }
+}
+
+// Restore remembered username
+const remembered = localStorage.getItem('inflex-remember-user');
+if (remembered) {
+  document.getElementById('username').value = remembered;
+  const cb = document.getElementById('rememberMe');
+  if (cb) cb.checked = true;
+  document.getElementById('password').focus();
+}
+
+// Enter key submits from any field
+document.querySelectorAll('.login-field input').forEach(input => {
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('loginForm').requestSubmit();
+    }
+  });
+});
+
+function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('inflex-dark-mode', isDark);
+}
+</script>
+</body>
+</html>

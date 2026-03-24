@@ -1,6 +1,12 @@
 {
   "rewrites": [
+    { "source": "/api/auth/:action", "destination": "/api/auth/[action]" },
+    { "source": "/api/subscribers/:action", "destination": "/api/subscribers/[action]" },
+    { "source": "/api/subscribers", "destination": "/api/subscribers/[action]" },
     { "source": "/api/articles/all", "destination": "/api/articles/all" },
+    { "source": "/api/articles/stats", "destination": "/api/articles/stats" },
+    { "source": "/api/articles/bulk", "destination": "/api/articles/bulk" },
+    { "source": "/api/articles/duplicate", "destination": "/api/articles/duplicate" },
     { "source": "/api/articles/upload-image", "destination": "/api/articles/upload-image" },
     { "source": "/api/articles/:slug", "destination": "/api/articles/[slug]" },
     { "source": "/api/articles", "destination": "/api/articles/index" }
